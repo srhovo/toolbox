@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#fcfcfd" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="下雪工具箱" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>下雪工具箱</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f8f9fa;
+      --card: rgba(255, 255, 255, 0.75);
+      --card-solid: #ffffff;
+      --text: #1a1a1a;
+      --muted: #6e6e73;
+      --muted-2: #86868b;
+      --line: rgba(0, 0, 0, 0.04);
+      --line-strong: rgba(0, 0, 0, 0.08);
+      --blue: #0066cc;
+      --blue-bg: #f5f9ff;
+      --fill: #f2f2f7;
+      --fill-2: #fcfcfd;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,.02);
+      --shadow-md: 0 12px 30px rgba(0,0,0,.03);
+      --shadow-lg: 0 20px 40px rgba(0,0,0,.06);
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --radius-sm: 12px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: auto; -webkit-font-smoothing: antialiased; }
+    
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "PingFang SC", sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at 50% 0%, #ffffff 0%, var(--bg) 70%);
+      text-rendering: optimizeLegibility;
+    }
+
+    body.modal-open { overflow: hidden; }
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; border: 0; outline: none; }
+    button { cursor: pointer; background: none; }
+    a, button, input { -webkit-tap-highlight-color: transparent; }
+
+    .page {
+      width: min(680px, 100%);
+      margin: 0 auto;
+      padding: calc(24px + env(safe-area-inset-top)) 20px calc(40px + env(safe-area-inset-bottom));
+    }
+
+    /* Hero Section */
+    .hero {
+      text-align: center;
+      padding: 14px 0 24px;
+    }
+    
+    /* 优雅高级的大标题 */
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(36px, 9vw, 46px);
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      font-weight: 800;
+      background: linear-gradient(135deg, #1a1a1a 30%, #4a4a4a 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .subtitle {
+      margin: 0 0 14px;
+      color: var(--muted-2);
+      font-size: clamp(14px, 3.5vw, 16px);
+      line-height: 1.5;
+      font-weight: 400;
+    }
+    /* 副标题小标签 */
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 999px;
+      color: var(--muted);
+      background: #ffffff;
+      font-size: 12px;
+      font-weight: 500;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(0,0,0,0.02);
+      letter-spacing: 0.02em;
+    }
+
+    /* Stack & Card Layout */
+    .stack { display: grid; gap: 24px; }
+
+    .card {
+      background: var(--card);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      padding: 28px;
+      transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease;
+    }
+    .card:hover {
+      box-shadow: var(--shadow-lg);
+    }
+
+    .tool-card { display: grid; gap: 20px; }
+    
+    .tool-title {
+      margin: 0 0 6px;
+      font-size: 20px;
+      line-height: 1.3;
+      letter-spacing: -0.02em;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .desc {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    /* Actions buttons */
+    .actions {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .btn {
+      min-height: 46px;
+      border-radius: var(--radius-sm);
+      background: var(--fill);
+      color: var(--text);
+      font-weight: 500;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 0 16px;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn:hover { background: rgba(0,0,0,0.06); }
+    .btn:active { transform: scale(.98); opacity: 0.85; }
+    
+    .btn.primary {
+      background: var(--text);
+      color: white;
+    }
+    .btn.primary:hover { background: #333333; }
+    .btn.primary:active { background: #000000; }
+    
+    .btn.outline {
+      background: transparent;
+      border: 1px solid var(--line-strong);
+      color: var(--muted);
+    }
+    .btn.outline:hover { background: var(--fill-2); color: var(--text); }
+
+    /* Links Box */
+    .link-box {
+      display: grid;
+      gap: 0;
+      overflow: hidden;
+      border-radius: var(--radius-md);
+      background: rgba(0, 0, 0, 0.015);
+      padding: 4px 0;
+    }
+    .link-row {
+      display: grid;
+      grid-template-columns: 70px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      min-width: 0;
+      padding: 12px 16px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .link-label { font-weight: 500; color: var(--text); }
+    .url {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--muted-2);
+    }
+    .mini-copy {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      color: var(--muted-2);
+      transition: all 0.2s;
+    }
+    .mini-copy:hover { background: var(--fill); color: var(--text); }
+
+    /* Tip Card (Apple Tips) */
+    .tip-card { display: grid; gap: 20px; }
+    .tip-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 20px;
+    }
+    .tip-text b { color: var(--text); font-weight: 600; }
+    
+    .steps {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+    }
+    .step {
+      min-height: 44px;
+      border-radius: var(--radius-sm);
+      background: var(--fill-2);
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      font-weight: 500;
+      font-size: 12px;
+      text-align: center;
+      padding: 6px 12px;
+      box-shadow: var(--shadow-sm);
+    }
+    .arrow { color: var(--muted-2); font-size: 14px; font-weight: 300; }
+
+    /* Footer */
+    .footer {
+      margin-top: 16px;
+      padding: 20px;
+      color: var(--muted-2);
+      text-align: center;
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: calc(32px + env(safe-area-inset-bottom));
+      transform: translateX(-50%) translateY(12px);
+      padding: 10px 20px;
+      border-radius: 999px;
+      background: rgba(26, 26, 26, 0.96);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: white;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      z-index: 50;
+      white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* Modal / Popup */
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .modal.show { opacity: 1; pointer-events: auto; }
+    .modal[hidden] { display: none; }
+    
+    .modal-panel {
+      width: min(520px, 100%);
+      max-height: 80vh;
+      overflow: auto;
+      border-radius: var(--radius-lg);
+      background: #ffffff;
+      box-shadow: var(--shadow-lg);
+      padding: 28px;
+      transform: scale(0.96) translateY(8px);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal.show .modal-panel { transform: scale(1) translateY(0); }
+    
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--line-strong);
+    }
+    .modal-head h2 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.01em; }
+    .close {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--fill);
+      font-size: 20px;
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      transition: background 0.2s;
+    }
+    .close:hover { background: rgba(0,0,0,0.08); color: var(--text); }
+    
+    .guide { display: grid; gap: 16px; margin-top: 20px; }
+    .guide-item {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 16px;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      background: var(--fill-2);
+      border: 1px solid var(--line);
+    }
+    .num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--text);
+      color: white;
+      font-weight: 600;
+      font-size: 12px;
+    }
+    .guide-item h3 { margin: 0 0 4px; font-size: 14px; color: var(--text); font-weight: 600; }
+    .guide-item p { margin: 0; color: var(--muted); line-height: 1.5; font-size: 13px; }
+    
+    .mock-share {
+      margin-top: 12px;
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      border: 1px solid var(--line-strong);
+      background: #fff;
+    }
+    .mock-row { padding: 10px 14px; border-top: 1px solid var(--line); color: var(--text); font-weight: 500; font-size: 13px; }
+    .mock-row:first-child { border-top: 0; }
+    .mock-row.highlight { color: var(--blue); background: var(--blue-bg); }
+    
+    .modal-note {
+      margin-top: 16px;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      background: #fff6e5;
+      color: #7a5813;
+      line-height: 1.5;
+      font-size: 12px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 580px) {
+      .actions { grid-template-columns: 1fr; gap: 8px; }
+      .steps { grid-template-columns: 1fr; gap: 4px; }
+      .arrow { transform: rotate(90deg); margin: 4px 0; }
+      .tip-head { flex-direction: column; align-items: stretch; gap: 14px; }
+      .tip-head .btn { width: 100%; }
+      .card { padding: 20px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero" aria-labelledby="page-title">
+      <h1 id="page-title">下雪工具箱</h1>
+      <p class="subtitle">网页版 · 安卓 APP · 轻量化快捷入口</p>
+      <div class="eyebrow">🛰️ srhovo</div>
+    </section>
+
+    <section class="stack" aria-label="工具入口">
+      <article class="card tool-card" data-tool="码单器">
+        <div class="tool-head">
+          <h2 class="tool-title">码单器</h2>
+          <p class="desc">高效的数据转换与对单工具，支持全平台适配。</p>
+        </div>
+
+        <div class="actions">
+          <a class="btn" href="https://srhovo.github.io/madan/">打开网页版</a>
+          <a class="btn primary" href="https://www.pgyer.com/xiaxuemadanqi">下载安卓 APP</a>
+          <button class="btn outline" type="button" data-copy="码单器\n网页版：https://srhovo.github.io/madan/\n安卓APP：https://www.pgyer.com/xiaxuemadanqi">复制链接</button>
+        </div>
+
+        <div class="link-box" aria-label="码单器链接信息">
+          <div class="link-row">
+            <span class="link-label">网页版</span>
+            <span class="url">https://srhovo.github.io/madan/</span>
+            <button class="mini-copy" type="button" aria-label="复制码单器网页版链接" data-copy="https://srhovo.github.io/madan/">⧉</button>
+          </div>
+          <div class="link-row">
+            <span class="link-label">APP</span>
+            <span class="url">https://www.pgyer.com/xiaxuemadanqi</span>
+            <button class="mini-copy" type="button" aria-label="复制码单器安卓 APP 链接" data-copy="https://www.pgyer.com/xiaxuemadanqi">⧉</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="card tool-card" data-tool="订单整理计算器">
+        <div class="tool-head">
+          <h2 class="tool-title">订单整理计算器</h2>
+          <p class="desc">快捷整理海量订单，提供精准数据看板与计算支撑。</p>
+        </div>
+
+        <div class="actions">
+          <a class="btn" href="https://srhovo.github.io/orca/">打开网页版</a>
+          <a class="btn primary" href="https://www.pgyer.com/xueorca">下载安卓 APP</a>
+          <button class="btn outline" type="button" data-copy="订单整理计算器\n网页版：https://srhovo.github.io/orca/\n安卓APP：https://www.pgyer.com/xueorca">复制链接</button>
+        </div>
+
+        <div class="link-box" aria-label="订单整理计算器链接信息">
+          <div class="link-row">
+            <span class="link-label">网页版</span>
+            <span class="url">https://srhovo.github.io/orca/</span>
+            <button class="mini-copy" type="button" aria-label="复制订单整理计算器网页版链接" data-copy="https://srhovo.github.io/orca/">⧉</button>
+          </div>
+          <div class="link-row">
+            <span class="link-label">APP</span>
+            <span class="url">https://www.pgyer.com/xueorca</span>
+            <button class="mini-copy" type="button" aria-label="复制订单整理计算器安卓 APP 链接" data-copy="https://www.pgyer.com/xueorca">⧉</button>
+          </div>
+        </div>
+      </article>
+
+      <article class="card tip-card" aria-label="苹果用户使用提示">
+        <div class="tip-head">
+          <div>
+            <h2 class="tool-title" style="margin:0 0 6px;">苹果 iOS 用户提示</h2>
+            <p class="desc tip-text">建议使用 <b>Safari</b> 浏览器打开，点击下方“分享”，选择 <b>“添加到主屏幕”</b>，即可获得接近原生 App 的全屏体验。</p>
+          </div>
+          <button class="btn outline" type="button" id="openGuide" style="min-height:40px; font-size:13px;">图文引导</button>
+        </div>
+        <div class="steps" aria-hidden="true">
+          <div class="step">1. Safari 访问</div>
+          <div class="arrow">→</div>
+          <div class="step">2. 点击分享图标</div>
+          <div class="arrow">→</div>
+          <div class="step">3. 添加到主屏幕</div>
+        </div>
+      </article>
+
+      <footer class="footer">后续程序更新及下载链接变更将在此页面实时同步</footer>
+    </section>
+  </main>
+
+  <div class="modal" id="guideModal" role="dialog" aria-modal="true" aria-labelledby="guideTitle" hidden>
+    <div class="modal-panel">
+      <div class="modal-head">
+        <h2 id="guideTitle">添加到主屏幕指南</h2>
+        <button class="close" type="button" id="closeGuide" aria-label="关闭">×</button>
+      </div>
+      <div class="guide">
+        <div class="guide-item">
+          <div class="num">1</div>
+          <div>
+            <h3>复制链接至 Safari</h3>
+            <p>请勿在微信或内置浏览器直接操作。点击右上角选择“在 Safari 中打开”。</p>
+          </div>
+        </div>
+        <div class="guide-item">
+          <div class="num">2</div>
+          <div>
+            <h3>点击底部的“分享”按钮</h3>
+            <p>即正下方带有向上箭头的方块图标。</p>
+            <div class="mock-share" aria-hidden="true">
+              <div class="mock-row highlight">分享...</div>
+              <div class="mock-row">添加到书签</div>
+            </div>
+          </div>
+        </div>
+        <div class="guide-item">
+          <div class="num">3</div>
+          <div>
+            <h3>选择“添加到主屏幕”</h3>
+            <p>滑动菜单找到“添加到主屏幕”，点击确认即可在桌面生成独立图标。</p>
+            <div class="mock-share" aria-hidden="true">
+              <div class="mock-row highlight">添加到主屏幕</div>
+              <div class="mock-row">打印</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-note">配置完成后，你可以在桌面直接启动，并享受无浏览器边框的沉浸式操作体验。</div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite">已复制</div>
+
+  <script>
+    (() => {
+      'use strict';
+      const toast = document.getElementById('toast');
+      let toastTimer = 0;
+
+      function showToast(message){
+        toast.textContent = message;
+        toast.classList.add('show');
+        window.clearTimeout(toastTimer);
+        toastTimer = window.setTimeout(() => toast.classList.remove('show'), 1600);
+      }
+
+      function fallbackCopy(text){
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'fixed';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        let ok = false;
+        try{ ok = document.execCommand('copy'); } catch(err){}
+        textarea.remove();
+        return ok;
+      }
+
+      async function copyText(text){
+        let copied = false;
+        if(navigator.clipboard && window.isSecureContext){
+          try { await navigator.clipboard.writeText(text); copied = true; } catch(err){}
+        }
+        if(!copied){ copied = fallbackCopy(text); }
+        showToast(copied ? '链接已成功复制' : '复制失败，请长按链接手动复制');
+      }
+
+      document.querySelectorAll('[data-copy]').forEach((btn) => {
+        btn.addEventListener('click', () => copyText(btn.getAttribute('data-copy') || ''));
+      });
+
+      const guideModal = document.getElementById('guideModal');
+      const openGuide = document.getElementById('openGuide');
+      const closeGuide = document.getElementById('closeGuide');
+      let modalClosingTimer = 0;
+
+      function openModal(){
+        window.clearTimeout(modalClosingTimer);
+        guideModal.hidden = false;
+        document.body.classList.add('modal-open');
+        requestAnimationFrame(() => guideModal.classList.add('show'));
+      }
+
+      function closeModal(){
+        guideModal.classList.remove('show');
+        document.body.classList.remove('modal-open');
+        modalClosingTimer = window.setTimeout(() => guideModal.hidden = true, 300);
+      }
+
+      openGuide.addEventListener('click', openModal);
+      closeGuide.addEventListener('click', closeModal);
+      guideModal.addEventListener('click', (e) => { if(e.target === guideModal) closeModal(); });
+      document.addEventListener('keydown', (e) => { if(e.key === 'Escape' && !guideModal.hidden) closeModal(); });
+    })();
+  </script>
+</body>
+</html>
