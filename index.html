@@ -137,6 +137,9 @@
       grid-template-columns: repeat(3, 1fr);
       gap: 12px;
     }
+        .actions.actions-two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
     .btn {
       min-height: 46px;
       border-radius: var(--radius-sm);
@@ -448,7 +451,28 @@
         </div>
       </article>
 
-      <article class="card tip-card" aria-label="苹果用户使用提示">
+      <article class="card tool-card" data-tool="老板扣卡管理系统">
+      <div class="tool-head">
+        <h2 class="tool-title">老板扣卡管理系统</h2>
+        <p class="desc">老板余额、充值、扣款与消费记录管理，支持订单提取和数据备份。</p>
+      </div>
+
+      <div class="actions actions-two">
+        <a class="btn primary" href="https://srhovo.github.io/ccm/">打开网页版</a>
+        <button class="btn outline" type="button" data-copy="老板扣卡管理系统
+网页版：https://srhovo.github.io/ccm/">复制链接</button>
+      </div>
+
+      <div class="link-box" aria-label="老板扣卡管理系统链接信息">
+        <div class="link-row">
+          <span class="link-label">网页版</span>
+          <span class="url">https://srhovo.github.io/ccm/</span>
+          <button class="mini-copy" type="button" aria-label="复制老板扣卡管理系统网页版链接" data-copy="https://srhovo.github.io/ccm/">⧉</button>
+        </div>
+      </div>
+    </article>
+
+          <article class="card tip-card" aria-label="苹果用户使用提示">
         <div class="tip-head">
           <div>
             <h2 class="tool-title" style="margin:0 0 6px;">苹果 iOS 用户提示</h2>
