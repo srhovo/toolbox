@@ -6,6 +6,9 @@ on:
       - agent/toolbox-add-ccm
     paths:
       - '.github/workflows/toolbox-add-ccm.yml'
+  pull_request:
+    branches:
+      - main
 
 permissions:
   contents: write
@@ -16,6 +19,8 @@ jobs:
     steps:
       - name: Checkout branch
         uses: actions/checkout@v4
+        with:
+          ref: agent/toolbox-add-ccm
 
       - name: Add CCM card without changing existing cards
         shell: python
@@ -26,24 +31,24 @@ jobs:
           text = path.read_text(encoding='utf-8')
 
           if 'data-tool="老板扣卡管理系统"' in text:
-              raise SystemExit('CCM card already exists')
+              print('CCM card already exists; validating current result')
+          else:
+              css_anchor = '''    .actions {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+              }
+              '''
+              css_insert = css_anchor + '''    .actions.actions-two {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+              }
+              '''
+              if css_anchor not in text:
+                  raise SystemExit('actions CSS anchor not found')
+              text = text.replace(css_anchor, css_insert, 1)
 
-          css_anchor = '''    .actions {
-              display: grid;
-              grid-template-columns: repeat(3, 1fr);
-              gap: 12px;
-            }
-          '''
-          css_insert = css_anchor + '''    .actions.actions-two {
-              grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
-          '''
-          if css_anchor not in text:
-              raise SystemExit('actions CSS anchor not found')
-          text = text.replace(css_anchor, css_insert, 1)
-
-          card_anchor = '      <article class="card tip-card" aria-label="苹果用户使用提示">'
-          card = '''      <article class="card tool-card" data-tool="老板扣卡管理系统">
+              card_anchor = '      <article class="card tip-card" aria-label="苹果用户使用提示">'
+              card = '''      <article class="card tool-card" data-tool="老板扣卡管理系统">
                 <div class="tool-head">
                   <h2 class="tool-title">老板扣卡管理系统</h2>
                   <p class="desc">老板余额、充值、扣款与消费记录管理，支持订单提取和数据备份。</p>
@@ -51,7 +56,7 @@ jobs:
 
                 <div class="actions actions-two">
                   <a class="btn primary" href="https://srhovo.github.io/ccm/">打开网页版</a>
-                  <button class="btn outline" type="button" data-copy="老板扣卡管理系统\\n网页版：https://srhovo.github.io/ccm/">复制链接</button>
+                  <button class="btn outline" type="button" data-copy="老板扣卡管理系统\n网页版：https://srhovo.github.io/ccm/">复制链接</button>
                 </div>
 
                 <div class="link-box" aria-label="老板扣卡管理系统链接信息">
@@ -63,11 +68,11 @@ jobs:
                 </div>
               </article>
 
-          '''
-          if card_anchor not in text:
-              raise SystemExit('tip card anchor not found')
-          text = text.replace(card_anchor, card + card_anchor, 1)
-          path.write_text(text, encoding='utf-8')
+              '''
+              if card_anchor not in text:
+                  raise SystemExit('tip card anchor not found')
+              text = text.replace(card_anchor, card + card_anchor, 1)
+              path.write_text(text, encoding='utf-8')
 
       - name: Static structure and regression checks
         shell: bash
@@ -148,5 +153,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html .github/workflows/toolbox-add-ccm.yml
-          git commit -m "在下雪工具箱加入老板扣卡管理系统"
-          git push
+          if git diff --cached --quiet; then
+            echo "No validated changes to commit"
+          else
+            git commit -m "在下雪工具箱加入老板扣卡管理系统"
+            git push origin HEAD:agent/toolbox-add-ccm
+          fi
