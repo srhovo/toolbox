@@ -1,0 +1,147 @@
+name: Assemble and validate CCM
+
+on:
+  push:
+    branches:
+      - agent/ccm-file-backup
+    paths:
+      - 'ccm/.parts/**'
+      - '.github/workflows/ccm-assemble.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  assemble:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+
+      - name: Stop until manifest exists
+        id: manifest
+        shell: bash
+        run: |
+          if [ -f ccm/.parts/manifest.json ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Assemble final single-file HTML
+        if: steps.manifest.outputs.ready == 'true'
+        shell: python
+        run: |
+          from pathlib import Path
+          import base64, hashlib, json
+          root = Path('ccm/.parts')
+          manifest = json.loads((root / 'manifest.json').read_text(encoding='utf-8'))
+          encoded = ''.join((root / f'part{i:02d}.b64').read_text(encoding='ascii') for i in range(manifest['parts']))
+          data = base64.b64decode(encoded, validate=True)
+          digest = hashlib.sha256(data).hexdigest()
+          if digest != manifest['sha256']:
+              raise SystemExit(f"SHA mismatch: {digest} != {manifest['sha256']}")
+          if len(data) != manifest['bytes']:
+              raise SystemExit(f"Size mismatch: {len(data)} != {manifest['bytes']}")
+          target = Path(manifest['target'])
+          target.parent.mkdir(parents=True, exist_ok=True)
+          target.write_bytes(data)
+          print(f"assembled {target}: {len(data)} bytes, {digest}")
+
+      - name: Validate HTML and JavaScript
+        if: steps.manifest.outputs.ready == 'true'
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from html.parser import HTMLParser
+          import re
+          path = Path('ccm/index.html')
+          text = path.read_text(encoding='utf-8')
+          required = [
+              'id="export-modal"', 'id="import-modal"', 'id="import-file-input"',
+              'copyExportData()', 'downloadExportFile()', 'handleImportFileSelection(file)',
+              'schemaVersion: 1', "app: 'CCM'"
+          ]
+          missing = [item for item in required if item not in text]
+          if missing:
+              raise SystemExit('missing required tokens: ' + ', '.join(missing))
+          ids = re.findall(r'\bid="([^"]+)"', text)
+          duplicates = sorted({item for item in ids if ids.count(item) > 1})
+          if duplicates:
+              raise SystemExit('duplicate ids: ' + ', '.join(duplicates))
+          scripts = re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', text, re.S | re.I)
+          if len(scripts) != 1:
+              raise SystemExit(f'expected one inline script, got {len(scripts)}')
+          Path('/tmp/ccm.js').write_text('\n'.join(scripts), encoding='utf-8')
+          print(f'HTML static checks passed: {len(ids)} ids')
+          PY
+          node --check /tmp/ccm.js
+
+      - name: Setup Chrome
+        if: steps.manifest.outputs.ready == 'true'
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Browser smoke test
+        if: steps.manifest.outputs.ready == 'true'
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          path = Path('ccm/index.html')
+          text = path.read_text(encoding='utf-8')
+          injected = r'''
+          <script>
+          window.addEventListener('load', async () => {
+            const checks = {};
+            try {
+              checks.initialized = Boolean(window.app && window.app.manager);
+              window.app.showExportModal();
+              const backup = document.getElementById('export-data-preview').value;
+              checks.exportPreview = backup.includes('"app": "CCM"');
+              window.app.closeModal('export-modal');
+              const file = new File([backup], 'CCM-test.json', {type: 'application/json'});
+              await window.app.handleImportFileSelection(file);
+              checks.fileRead = document.getElementById('import-data').value === backup;
+              checks.roundtrip = window.app.manager.importData(backup) === true;
+            } catch (error) {
+              checks.error = String(error && error.message || error);
+            }
+            document.documentElement.setAttribute('data-ccm-ci', encodeURIComponent(JSON.stringify(checks)));
+          });
+          </script>
+          '''
+          text = re.sub(r'</body>', injected + '\n</body>', text, count=1, flags=re.I)
+          Path('/tmp/ccm-smoke.html').write_text(text, encoding='utf-8')
+          PY
+          timeout 40s chrome --headless --no-sandbox --disable-gpu --disable-dev-shm-usage --allow-file-access-from-files --virtual-time-budget=5000 --dump-dom file:///tmp/ccm-smoke.html > /tmp/ccm-dom.html
+          python - <<'PY'
+          from pathlib import Path
+          import html, json, re, urllib.parse
+          dom = Path('/tmp/ccm-dom.html').read_text(encoding='utf-8')
+          match = re.search(r'data-ccm-ci="([^"]+)"', dom)
+          if not match:
+              raise SystemExit('browser smoke result missing')
+          result = json.loads(urllib.parse.unquote(html.unescape(match.group(1))))
+          required = ['initialized', 'exportPreview', 'fileRead', 'roundtrip']
+          failed = [name for name in required if result.get(name) is not True]
+          if failed:
+              raise SystemExit(f'browser smoke failed: {failed}; result={result}')
+          print('browser smoke passed:', result)
+          PY
+
+      - name: Commit validated final file
+        if: steps.manifest.outputs.ready == 'true'
+        shell: bash
+        run: |
+          rm -rf ccm/.parts
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add ccm/index.html ccm/.parts
+          if git diff --cached --quiet; then
+            echo "No assembly changes to commit"
+          else
+            git commit -m "Publish validated CCM single-file app"
+            git push
+          fi
