@@ -99,8 +99,8 @@ jobs:
 
           if text.count('data-tool="老板扣卡管理系统"') != 1:
               raise SystemExit('CCM card must appear exactly once')
-          if text.count('https://srhovo.github.io/ccm/') != 3:
-              raise SystemExit('CCM URL must appear exactly three times')
+          if text.count('https://srhovo.github.io/ccm/') != 4:
+              raise SystemExit('CCM URL must appear exactly four times')
           if text.count('data-tool="码单器"') != 1 or text.count('data-tool="订单整理计算器"') != 1:
               raise SystemExit('existing tool cards changed unexpectedly')
 
