@@ -1,0 +1,3499 @@
+<!DOCTYPE html>
+<html class="fa-fallback" lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>老板扣卡管理系统</title>
+<link as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" id="font-awesome-stylesheet" onload="this.onload=null;this.rel='stylesheet';document.dispatchEvent(new Event('ccm-fontawesome-loaded'))" onerror="document.documentElement.classList.add('fa-fallback')" rel="preload"/>
+<style>
+        :root {
+            --primary-color: #ff69b4;
+            --secondary-color: #9370db;
+            --light-bg: #fff0f5;
+            --card-bg: #fffaf0;
+            --text-color: #333;
+            --border-color: #e0b0ff;
+            --success-color: #32cd32;
+            --warning-color: #ffa500;
+            --danger-color: #ff4500;
+            --info-color: #4169e1;
+        }
+        /* Font Awesome 为可选增强；网络不可用时使用内置字符图标，页面功能不受影响。 */
+        .fa-fallback .fas,
+        .fa-fallback .far,
+        .fa-fallback .fab {
+            font-family: inherit;
+            font-style: normal;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 1.05em;
+            line-height: 1;
+        }
+        .fa-fallback .fas::before { content: "•"; }
+        .fa-fallback .fa-crown::before { content: "♛"; }
+        .fa-fallback .fa-store::before,
+        .fa-fallback .fa-id-card::before { content: "▣"; }
+        .fa-fallback .fa-lock::before { content: "🔒"; }
+        .fa-fallback .fa-unlock::before { content: "🔓"; }
+        .fa-fallback .fa-icons::before { content: "✦"; }
+        .fa-fallback .fa-users::before { content: "♟"; }
+        .fa-fallback .fa-chevron-down::before { content: "⌄"; }
+        .fa-fallback .fa-search::before { content: "⌕"; }
+        .fa-fallback .fa-user-plus::before { content: "+"; }
+        .fa-fallback .fa-money-bill-wave::before,
+        .fa-fallback .fa-coins::before { content: "¥"; }
+        .fa-fallback .fa-list::before { content: "☷"; }
+        .fa-fallback .fa-layer-group::before { content: "▦"; }
+        .fa-fallback .fa-handshake::before { content: "◇"; }
+        .fa-fallback .fa-file-invoice::before,
+        .fa-fallback .fa-receipt::before { content: "▤"; }
+        .fa-fallback .fa-info-circle::before,
+        .fa-fallback .fa-circle-info::before { content: "ⓘ"; }
+        .fa-fallback .fa-copy::before,
+        .fa-fallback .fa-paste::before { content: "⧉"; }
+        .fa-fallback .fa-broom::before { content: "⌁"; }
+        .fa-fallback .fa-sync-alt::before { content: "↻"; }
+        .fa-fallback .fa-history::before { content: "↺"; }
+        .fa-fallback .fa-download::before { content: "↓"; }
+        .fa-fallback .fa-upload::before,
+        .fa-fallback .fa-file-import::before { content: "↑"; }
+        .fa-fallback .fa-check::before,
+        .fa-fallback .fa-save::before { content: "✓"; }
+        .fa-fallback .fa-edit::before,
+        .fa-fallback .fa-user-edit::before { content: "✎"; }
+        .fa-fallback .fa-exclamation-triangle::before { content: "⚠"; }
+        .fa-fallback .fa-trash::before,
+        .fa-fallback .fa-times::before { content: "×"; }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                scroll-behavior: auto !important;
+                transition-duration: 0.01ms !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #f8f4ff 0%, #fff0f5 100%);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            font-size: 16px;
+            padding-bottom: 80px;
+        }
+        input, textarea, select {
+            font-size: 16px !important;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 20px;
+        }
+        header {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 15px;
+            color: white;
+            box-shadow: 0 5px 15px rgba(255, 105, 180, 0.3);
+        }
+        header h1 {
+            font-size: 28px;
+            margin-bottom: 5px;
+        }
+        .control-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .section-title {
+            font-size: 18px;
+            color: var(--primary-color);
+            margin: 0 0 10px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+        .section-title .toggle-icon {
+            font-size: 14px;
+            transition: transform 0.3s;
+        }
+        .section-title.collapsed .toggle-icon {
+            transform: rotate(-90deg);
+        }
+        .collapsible-content {
+            max-height: 1000px;
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            opacity: 1;
+        }
+        .collapsible-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            background: white;
+        }
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(255, 105, 180, 0.2);
+        }
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+            flex: 1;
+            min-width: 0;
+        }
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #ff1493;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(255, 105, 180, 0.3);
+        }
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #7b68ee;
+            transform: translateY(-2px);
+        }
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+        .btn-warning {
+            background: var(--warning-color);
+            color: white;
+        }
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+        .btn-info {
+            background: var(--info-color);
+            color: white;
+        }
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 12px;
+            flex: none;
+        }
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .boss-search-container {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .boss-search-container i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+        .boss-search {
+            width: 100%;
+            padding: 10px 15px 10px 40px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .boss-list-container {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .boss-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .boss-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .boss-item:hover {
+            background: #f9f0ff;
+        }
+        .boss-item.selected {
+            background: #ffe4f2;
+            border-left: 4px solid var(--primary-color);
+        }
+        .boss-item .name {
+            font-weight: 600;
+            margin-bottom: 3px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .boss-item .balance {
+            font-size: 12px;
+            color: #666;
+        }
+        .boss-item-actions {
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .boss-item:hover .boss-item-actions {
+            opacity: 1;
+        }
+        .boss-action-btn,
+        .separator-card-btn,
+        .multi-project-action-btn {
+            background: none;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .boss-action-btn,
+        .separator-card-btn {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .multi-project-action-btn {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            font-size: 10px;
+        }
+        .boss-edit-btn,
+        .separator-card-edit {
+            color: var(--info-color);
+        }
+        .boss-edit-btn:hover,
+        .separator-card-edit:hover {
+            background: rgba(65, 105, 225, 0.1);
+        }
+        .boss-delete-btn,
+        .separator-card-delete,
+        .multi-project-remove-btn {
+            color: var(--danger-color);
+        }
+        .boss-delete-btn:hover,
+        .separator-card-delete:hover,
+        .multi-project-remove-btn:hover {
+            background: rgba(255, 69, 0, 0.1);
+        }
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        .display-panel {
+            display: grid;
+            grid-template-rows: auto 1fr;
+            gap: 20px;
+        }
+        .boss-info {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        .boss-info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .boss-info-item {
+            background: #f9f9ff;
+            padding: 8px 10px;
+            border-radius: 6px;
+            border-left: 3px solid var(--secondary-color);
+            min-height: 60px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .boss-info-item .label {
+            font-size: 11px;
+            color: #777;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .boss-info-item .value {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-color);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .card-display {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        .card-content {
+            font-family: 'Microsoft YaHei', sans-serif;
+            line-height: 1.6;
+            white-space: pre-line;
+            font-size: 15px;
+            color: #5a4a6a;
+            flex-grow: 1;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            min-height: 300px;
+        }
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+        .button-row.center {
+            justify-content: center;
+            margin-top: 30px;
+            margin-bottom: 60px;
+        }
+        .separator-settings-btn {
+            width: 100%;
+            margin-bottom: 10px;
+            background: #f0f0f0;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+        .separator-settings-btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-2px);
+        }
+        .status-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--primary-color);
+            color: white;
+            padding: 10px 20px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1001;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .modal-title {
+            font-size: 22px;
+            color: var(--primary-color);
+        }
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        .close-modal:hover {
+            background: #f5f5f5;
+        }
+        .history-list {
+            margin-top: 15px;
+        }
+        .history-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .history-item:nth-child(even) {
+            background: #f9f9f9;
+        }
+        .history-details {
+            flex-grow: 1;
+        }
+        .history-amount {
+            font-weight: 600;
+            margin-left: 20px;
+        }
+        .recharge {
+            color: var(--success-color);
+        }
+        .consumption {
+            color: var(--danger-color);
+        }
+        .separator-settings-content {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+        .separator-settings-section {
+            background: #f9f9ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px dashed var(--border-color);
+        }
+        .separator-settings-section h4 {
+            margin-bottom: 10px;
+            color: var(--secondary-color);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .separator-mode-selector {
+            display: flex;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        .separator-mode-btn {
+            flex: 1;
+            padding: 8px;
+            background: #f5f5f5;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            font-size: 13px;
+        }
+        .separator-mode-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        .separator-input-group {
+            margin-bottom: 10px;
+        }
+        .separator-presets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .separator-preset {
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+        .separator-preset:hover {
+            border-color: var(--primary-color);
+            background: rgba(255, 105, 180, 0.05);
+        }
+        .separator-preset.selected {
+            border-color: var(--primary-color);
+            background: rgba(255, 105, 180, 0.1);
+            color: var(--primary-color);
+        }
+        .separator-cards-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        .separator-card {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .separator-card.active {
+            border-color: var(--success-color);
+            background: #f0fff0;
+        }
+        .separator-card-name {
+            font-weight: 500;
+            flex: 1;
+        }
+        .separator-card-actions,
+        .multi-project-actions {
+            display: flex;
+            gap: 5px;
+        }
+        .multi-project-container {
+            background: #f9f9ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 10px;
+            border: 1px solid var(--border-color);
+        }
+        .multi-project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .multi-project-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 10px;
+        }
+        .multi-project-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 10px;
+            border-bottom: 1px solid #eee;
+            background: white;
+            border-radius: 5px;
+            margin-bottom: 5px;
+        }
+        .multi-project-item:last-child {
+            border-bottom: none;
+        }
+        .multi-project-details {
+            flex: 1;
+        }
+        .multi-project-amount {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-left: 10px;
+        }
+        .multi-project-total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid #eee;
+            font-weight: 600;
+        }
+        .project-summary {
+            background: #e8f5e9;
+            border-radius: 8px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 13px;
+            color: #2e7d32;
+        }
+        .order-extract-input {
+            min-height: 150px;
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .sweet-mode-indicator {
+            display: inline-block;
+            padding: 2px 8px;
+            background: #ffeb3b;
+            color: #333;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 5px;
+            vertical-align: middle;
+        }
+        .exchange-section {
+            background: #f0f8ff;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+            border: 1px solid #d0e8ff;
+        }
+        .exchange-section label {
+            color: #4169e1;
+            font-weight: 600;
+        }
+        .no-bosses {
+            text-align: center;
+            padding: 30px 20px;
+            color: #999;
+            font-style: italic;
+        }
+        .boss-stats {
+            font-size: 12px;
+            color: #777;
+            margin-top: 5px;
+            text-align: center;
+        }
+        .paste-button-container {
+            margin-bottom: 10px;
+        }
+        .paste-btn {
+            width: 100%;
+            padding: 8px;
+            background: var(--info-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .paste-btn:hover {
+            background: #2a56c6;
+        }
+        .extract-auto-result {
+            background: #f9f9ff;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-top: 10px;
+            font-size: 13px;
+            line-height: 1.5;
+            max-height: 150px;
+            overflow-y: auto;
+            display: none;
+        }
+        .extract-auto-result.active {
+            display: block;
+        }
+        .clear-inputs-btn {
+            background: #888;
+            color: white;
+        }
+        .clear-inputs-btn:hover {
+            background: #666;
+            transform: translateY(-2px);
+        }
+        .separator-lock-btn {
+            background: var(--warning-color);
+            color: white;
+        }
+        .separator-lock-btn:hover {
+            background: #e59400;
+        }
+        .separator-lock-btn.locked {
+            background: var(--danger-color);
+        }
+        @media (max-width: 1200px) {
+            .container {
+                grid-template-columns: 300px 1fr;
+            }
+        }
+        @media (max-width: 992px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            .boss-info-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .button-row.center {
+                margin-bottom: 80px;
+            }
+        }
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+                padding-bottom: 70px;
+            }
+            .boss-info-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .btn-group {
+                flex-wrap: wrap;
+            }
+            .separator-mode-btn {
+                font-size: 12px;
+                padding: 6px;
+            }
+        }
+        @media (max-width: 480px) {
+            .control-panel,
+            .boss-info,
+            .card-display {
+                padding: 15px;
+            }
+            .btn {
+                padding: 8px 12px;
+                font-size: 14px;
+            }
+            .separator-mode-selector {
+                flex-direction: column;
+            }
+        }
+        .operation-title {
+            margin-top: 4px;
+        }
+        .primary-action-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.9fr);
+            align-items: stretch;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .btn-main-action {
+            min-height: 44px;
+            border-radius: 10px;
+            font-size: 15px;
+            letter-spacing: 0.2px;
+            box-shadow: 0 3px 8px rgba(255, 105, 180, 0.2);
+        }
+        .btn-danger-soft {
+            background: #fff5f5;
+            color: var(--danger-color);
+            border: 1px solid rgba(255, 69, 0, 0.25);
+        }
+        .btn-danger-soft:hover {
+            background: #ffe8e8;
+            transform: translateY(-2px);
+        }
+        .secondary-action-row .btn {
+            min-height: 40px;
+        }
+        .data-action-row {
+            margin-top: 14px;
+            margin-bottom: 18px;
+            padding-top: 14px;
+            border-top: 1px dashed var(--border-color);
+        }
+        .data-action-row .btn {
+            flex: 0 1 160px;
+            min-height: 40px;
+        }
+        .boss-action-btn,
+        .separator-card-btn,
+        .multi-project-action-btn {
+            min-width: 36px;
+            min-height: 36px;
+        }
+        .close-modal {
+            width: 44px;
+            height: 44px;
+            font-size: 28px;
+            flex: 0 0 44px;
+            touch-action: manipulation;
+        }
+        .modal-content {
+            width: min(92vw, 800px);
+        }
+        .modal-header {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            background: white;
+        }
+        body.modal-open {
+            overflow: hidden;
+        }
+        @media (max-width: 992px) {
+            .container {
+                display: flex;
+                flex-direction: column;
+                gap: 14px;
+            }
+            header {
+                order: 0;
+                margin-bottom: 0;
+            }
+            .display-panel {
+                display: contents;
+            }
+            .boss-info {
+                order: 1;
+            }
+            .control-panel {
+                order: 2;
+                gap: 14px;
+            }
+            .card-display {
+                order: 3;
+            }
+            .operation-title {
+                order: 1;
+            }
+            .operation-content {
+                order: 2;
+            }
+            #boss-management-title {
+                order: 3;
+            }
+            #boss-management-content {
+                order: 4;
+            }
+            .club-settings {
+                order: 5;
+            }
+            .separator-settings-btn {
+                order: 6;
+                margin-bottom: 0;
+                background: #fafafa;
+            }
+            .boss-list-container,
+            .boss-list {
+                max-height: 220px;
+            }
+            .boss-item {
+                min-height: 58px;
+                padding: 11px 12px;
+            }
+            .boss-item-actions {
+                opacity: 1;
+            }
+            .primary-action-row {
+                grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.9fr);
+                gap: 8px;
+            }
+            .primary-action-row .btn {
+                width: 100%;
+            }
+            .btn-main-action,
+            .btn-danger-soft {
+                min-height: 44px;
+            }
+            .secondary-action-row {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 8px;
+            }
+            .secondary-action-row .btn {
+                padding: 9px 8px;
+                font-size: 13px;
+                width: 100%;
+            }
+            .button-row.center,
+            .data-action-row {
+                margin-top: 14px;
+                margin-bottom: 24px;
+            }
+            .card-content {
+                min-height: 240px;
+                font-size: 14px;
+                padding: 12px;
+            }
+        }
+        @media (max-width: 768px) {
+            .modal {
+                padding: 12px;
+                align-items: stretch;
+            }
+            .modal-content {
+                width: 100%;
+                max-height: calc(100dvh - 24px);
+                padding: 16px;
+                border-radius: 14px;
+            }
+            .modal-title {
+                font-size: 19px;
+                line-height: 1.25;
+            }
+            .modal-header {
+                margin-bottom: 16px;
+                padding-bottom: 12px;
+            }
+            .status-bar {
+                padding: 8px 10px calc(8px + env(safe-area-inset-bottom));
+                font-size: 12px;
+                gap: 8px;
+            }
+        }
+        @media (max-width: 480px) {
+            body {
+                padding-bottom: 86px;
+            }
+            header h1 {
+                font-size: 22px;
+            }
+            .boss-info-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+            }
+            .boss-info-item {
+                min-height: 54px;
+                padding: 8px;
+            }
+            .boss-info-item .value {
+                font-size: 15px;
+            }
+            .secondary-action-row {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+            #view-history-btn {
+                grid-column: 1 / -1;
+            }
+            .data-action-row {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
+            }
+            .data-action-row .btn {
+                width: 100%;
+            }
+            .form-group > div[style*="display: flex"] {
+                gap: 8px !important;
+            }
+            .boss-action-btn,
+            .separator-card-btn,
+            .multi-project-action-btn {
+                min-width: 44px;
+                min-height: 44px;
+                touch-action: manipulation;
+            }
+        }
+        .data-action-row {
+            opacity: 0.88;
+        }
+        .data-action-row .btn {
+            background: #f7f7fb;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+        }
+        .data-action-row .btn:hover {
+            background: #f0efff;
+            transform: translateY(-1px);
+        }
+        .modal-footer {
+            position: sticky;
+            bottom: 0;
+            z-index: 2;
+            display: flex;
+            gap: 10px;
+            margin-top: 18px;
+            padding-top: 14px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.86), #fff 28%);
+            border-top: 1px solid #f1e8f7;
+        }
+        .modal-footer .btn,
+        .modal-footer button {
+            min-height: 42px;
+        }
+        .confirm-action-row {
+            justify-content: center;
+        }
+        .extract-action-row #apply-order-extract-btn {
+            flex: 1.4 1 180px;
+        }
+        .extract-action-row #close-order-extract-btn {
+            flex: 0.8 1 110px;
+        }
+        @media (max-width: 768px) {
+            .modal-footer {
+                margin-left: -16px;
+                margin-right: -16px;
+                margin-bottom: -16px;
+                padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+            }
+            .modal-footer .btn,
+            .modal-footer button {
+                min-height: 46px;
+            }
+        }
+        @media (max-width: 480px) {
+            .modal-footer {
+                flex-direction: column;
+            }
+            .data-action-row .btn {
+                min-height: 42px;
+                font-size: 13px;
+                touch-action: manipulation;
+            }
+        }
+        .btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+        }
+        .extract-helper-text {
+            margin: 6px 0 10px;
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+        .extract-auto-result {
+            max-height: 260px;
+        }
+
+        .backup-method-card {
+            background: #f9f9ff;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .backup-method-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: var(--secondary-color);
+            font-weight: 700;
+        }
+
+        .backup-helper-text {
+            margin: 6px 0 10px;
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .backup-data-preview {
+            min-height: 180px;
+            max-height: 320px;
+            resize: vertical;
+            font-family: monospace;
+            font-size: 12px !important;
+            line-height: 1.45;
+        }
+
+        .backup-file-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .backup-file-input {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .backup-file-name {
+            flex: 1 1 180px;
+            color: #666;
+            font-size: 13px;
+            overflow-wrap: anywhere;
+        }
+
+        .backup-file-name.loaded {
+            color: #2e7d32;
+            font-weight: 600;
+        }
+
+        .backup-action-row {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .backup-action-row .btn {
+            width: 100%;
+            min-height: 44px;
+        }
+
+        @media (max-width: 480px) {
+            .backup-action-row {
+                grid-template-columns: 1fr;
+            }
+
+            .backup-file-row .btn {
+                width: 100%;
+            }
+        }
+        .extract-result-card {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .extract-result-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            font-weight: 700;
+        }
+        .extract-status-pill {
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .extract-status-pill.ok {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .extract-status-pill.warn {
+            background: #fff8e1;
+            color: #9a6a00;
+        }
+        .extract-status-pill.error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .extract-result-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 8px;
+        }
+        .extract-field {
+            background: #fff;
+            border: 1px solid #f0d8f5;
+            border-radius: 8px;
+            padding: 8px 10px;
+            min-width: 0;
+        }
+        .extract-field.full {
+            grid-column: 1 / -1;
+        }
+        .extract-field-label {
+            color: #777;
+            font-size: 11px;
+            margin-bottom: 2px;
+        }
+        .extract-field-value {
+            font-weight: 600;
+            overflow-wrap: anywhere;
+        }
+        .extract-preview-line {
+            background: #fff7fb;
+            border: 1px dashed var(--primary-color);
+            border-radius: 8px;
+            padding: 8px 10px;
+            color: #5a4a6a;
+            overflow-wrap: anywhere;
+        }
+        .extract-warning-list {
+            margin: 0;
+            padding-left: 18px;
+            color: #8a5c00;
+        }
+        @media (max-width: 480px) {
+            .extract-result-grid {
+                grid-template-columns: 1fr;
+            }
+            .extract-result-head {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+        }
+    </style>
+<meta content='{"AIGC":{"Label":"2","ContentProducer":"WUSIGRAM","ProduceID":"SmD+h3qmApNVJLuPK9Ym0uNO6D35zXihLWc5XZ0kO+s=","ReservedCode1":"VrZbfm5fcTERITx1LiQQu/CUv0i3n/YedgUgH3AKw2z97jJ8Exu9nTntFLJOr0cMtDEi1vX5iPhZT+FvnI2anA==","ContentPropagator":"","PropagateID":"","ReservedCode2":""}}' name="AIGC"/>
+</head>
+<body>
+<div class="container">
+<header>
+<h1><i class="fas fa-crown"></i> 老板扣卡管理系统</h1>
+<p>定制联系srhovo</p>
+</header>
+<div class="control-panel">
+<div class="form-group club-settings">
+<label for="club-name"><i class="fas fa-store"></i> 俱乐部名称</label>
+<div style="display: flex; gap: 10px;">
+<input class="form-control" id="club-name" type="text" value="𝑺𝒆𝒆·𝑪𝑳𝑼𝑩"/>
+<button class="btn btn-secondary btn-small" id="lock-btn"><i class="fas fa-lock"></i> 锁定</button>
+</div>
+<div class="checkbox-group">
+<input id="auto-lock" type="checkbox"/>
+<label for="auto-lock">启动时自动锁定名称</label>
+</div>
+</div>
+<button class="btn separator-settings-btn" id="open-separator-settings-btn">
+<i class="fas fa-icons"></i> 消费项目分隔符号设置
+            </button>
+<h3 class="section-title" id="boss-management-title">
+<span><i class="fas fa-users"></i> 老板管理</span>
+<i class="fas fa-chevron-down toggle-icon"></i>
+</h3>
+<div class="collapsible-content" id="boss-management-content">
+<div class="boss-search-container">
+<i class="fas fa-search"></i>
+<input class="boss-search" id="boss-search" placeholder="搜索姓名、拼音首字母、共同持卡人或备注..." type="text"/>
+</div>
+<div class="boss-list-container">
+<div class="boss-list" id="boss-list">
+</div>
+</div>
+<div class="boss-stats" id="boss-stats">老板总数: 0</div>
+<div class="form-group">
+<label for="new-boss-name"><i class="fas fa-user-plus"></i> 添加新老板</label>
+<div style="display: flex; gap: 10px;">
+<input class="form-control" id="new-boss-name" placeholder="输入老板姓名" type="text"/>
+<button class="btn btn-primary btn-small" id="add-boss-btn">添加</button>
+</div>
+</div>
+</div>
+<h3 class="section-title operation-title"><i class="fas fa-edit"></i> 消费/充值操作</h3>
+<div class="collapsible-content operation-content">
+<div class="form-group">
+<label for="operation-amount"><i class="fas fa-money-bill-wave"></i> 金额</label>
+<input class="form-control" id="operation-amount" placeholder="输入金额或从订单提取" type="number"/>
+</div>
+<div class="form-group">
+<label for="operation-project"><i class="fas fa-list"></i> 消费项目</label>
+<div style="display: flex; gap: 10px; margin-bottom: 5px;">
+<input class="form-control" id="operation-project" placeholder="消费项目将自动生成" type="text"/>
+<button class="btn btn-info btn-small" id="extract-order-btn" title="从订单提取"><i class="fas fa-file-import"></i> 提取</button>
+</div>
+<div class="multi-project-container" id="multi-project-container" style="display: none;">
+<div class="multi-project-header">
+<span><i class="fas fa-layer-group"></i> 多消费项目管理</span>
+<button class="btn btn-danger btn-small" id="clear-projects-btn">清空</button>
+</div>
+<div class="multi-project-list" id="multi-project-list">
+</div>
+<div class="multi-project-total">
+<span>总金额:</span>
+<span id="multi-project-total">0</span>
+</div>
+<div class="project-summary" id="project-summary">
+                            当前项目: 0个
+                        </div>
+</div>
+</div>
+<div class="form-group">
+<label for="co-holder"><i class="fas fa-handshake"></i> 共同持卡人</label>
+<input class="form-control" id="co-holder" type="text" value="🈚️"/>
+</div>
+<div class="form-group">
+<label for="vip-note"><i class="fas fa-file-invoice"></i> VIP存单</label>
+<input class="form-control" id="vip-note" placeholder="VIP存单备注" type="text"/>
+<div style="font-size: 12px; color: #666; margin-top: 5px;">
+<i class="fas fa-info-circle"></i> 备注中包含"甜蜜"时，消费项目将添加"甜蜜"前缀
+                    </div>
+</div>
+<div class="exchange-section">
+<label for="exchange-coin"><i class="fas fa-coins"></i> 兑换币</label>
+<input class="form-control" id="exchange-coin" placeholder="输入兑换币信息（如：100币）" type="text"/>
+</div>
+<div class="button-row primary-action-row">
+<button class="btn btn-primary btn-main-action" id="copy-and-consume-btn">
+<i class="fas fa-copy"></i> 复制并扣款
+                    </button>
+<button class="btn clear-inputs-btn btn-danger-soft" id="clear-all-inputs-btn">
+<i class="fas fa-broom"></i> 全部清除
+                    </button>
+</div>
+<div class="button-row secondary-action-row">
+<button class="btn btn-success" id="recharge-btn">
+<i class="fas fa-coins"></i> 充值
+                    </button>
+<button class="btn btn-secondary" id="update-info-btn">
+<i class="fas fa-sync-alt"></i> 更新信息
+                    </button>
+<button class="btn btn-warning" id="view-history-btn">
+<i class="fas fa-history"></i> 查看历史
+                    </button>
+</div>
+</div>
+</div>
+<div class="display-panel">
+<div class="boss-info">
+<h3 class="section-title"><i class="fas fa-id-card"></i> 当前老板信息</h3>
+<div id="current-boss-info">
+<div class="boss-info-grid">
+<div class="boss-info-item">
+<div class="label">老板姓名</div>
+<div class="value">-</div>
+</div>
+<div class="boss-info-item">
+<div class="label">共同持卡人</div>
+<div class="value">-</div>
+</div>
+<div class="boss-info-item">
+<div class="label">VIP总充值</div>
+<div class="value">-</div>
+</div>
+<div class="boss-info-item">
+<div class="label">剩余金额</div>
+<div class="value">-</div>
+</div>
+</div>
+</div>
+</div>
+<div class="card-display">
+<h3 class="section-title"><i class="fas fa-receipt"></i> 扣卡模板</h3>
+<div class="card-content" id="card-content">
+🐾⋆⁺🍥ᨳ 𝑺𝒆𝒆·𝑪𝑳𝑼𝑩 ໒꒱⁺⋆🍥🐾
+   🍧尊贵的𝐕𝐈𝐏会员：
+      🍡共同持卡人：
+       👛𝐕𝐈𝐏总充值：
+        💒本次充值：
+        🌷本次消费：
+        🎀消费项目：
+        🎡剩余金额：
+        🎟️𝐕𝐈𝐏存单：
+        💎兑换币：
+  ━━･❪ 𝑺𝒆𝒆·𝑪𝑳𝑼𝑩专属 ❫ ･━━
+     ☪︎感谢𝐕𝐈𝐏会员：
+      对  𝑺𝒆𝒆 的支持与厚爱🍧
+       生成日期时间
+ 🍥:;*─═🍧:;*─═🍡:;*─═🍥
+                </div>
+<div class="button-row center data-action-row">
+<button class="btn btn-success" id="export-data-btn">
+<i class="fas fa-download"></i> 导出数据
+                    </button>
+<button class="btn" id="import-data-btn">
+<i class="fas fa-upload"></i> 导入数据
+                    </button>
+</div>
+</div>
+</div>
+</div>
+<div aria-atomic="true" aria-live="polite" class="status-bar" id="status-bar" role="status">
+<span>就绪 | 数据已自动保存</span>
+<span>老板总数: <span id="boss-count">0</span></span>
+</div>
+<div aria-hidden="true" aria-labelledby="separator-settings-modal-title" aria-modal="true" class="modal" id="separator-settings-modal" role="dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h2 class="modal-title" id="separator-settings-modal-title"><i class="fas fa-icons"></i> 消费项目分隔符号设置</h2>
+<button aria-label="关闭弹窗" class="close-modal" id="close-separator-modal">×</button>
+</div>
+<div class="separator-settings-content">
+<div class="separator-settings-section">
+<h4>
+<span>分隔符号模式设置</span>
+<button class="btn btn-warning btn-small" id="separator-lock-btn"><i class="fas fa-lock"></i> 锁定</button>
+</h4>
+<div class="separator-mode-selector">
+<button class="separator-mode-btn active" id="separator-mode-single">统一表情包</button>
+<button class="separator-mode-btn" id="separator-mode-multiple">逐个表情包</button>
+</div>
+<div class="separator-input-group" id="single-separator-mode">
+<label for="single-separator">统一分隔表情包</label>
+<input class="form-control" id="single-separator" placeholder="输入统一使用的分隔表情包" type="text" value="🪻"/>
+<div class="separator-presets" id="single-separator-presets">
+<div class="separator-preset" data-separator="🪻">🪻</div>
+<div class="separator-preset" data-separator="🌻">🌻</div>
+<div class="separator-preset" data-separator="🌼">🌼</div>
+<div class="separator-preset" data-separator="🍄">🍄</div>
+<div class="separator-preset" data-separator="🍁">🍁</div>
+<div class="separator-preset" data-separator="🍃">🍃</div>
+<div class="separator-preset" data-separator="🌱">🌱</div>
+<div class="separator-preset" data-separator="🎄">🎄</div>
+</div>
+</div>
+<div class="separator-input-group" id="multiple-separator-mode" style="display: none;">
+<label for="multiple-separators">逐个分隔表情包（用空格分隔）</label>
+<input class="form-control" id="multiple-separators" placeholder="输入多个表情包，用空格分隔" type="text" value="🪻 🌻 🌼 🍄 🍁 🍃 🌱 🎄"/>
+<div class="separator-presets" id="multiple-separator-presets">
+<div class="separator-preset" data-separator="🪻 🌻 🌼 🍄 🍁 🍃 🌱 🎄">默认序列</div>
+<div class="separator-preset" data-separator="❤️ 🧡 💛 💚 💙 💜">彩虹序列</div>
+<div class="separator-preset" data-separator="⭐ 🌟 ✨ ⚡ 💫">星星序列</div>
+</div>
+</div>
+</div>
+<div class="separator-settings-section">
+<h4>分隔符号方案库</h4>
+<div class="separator-cards-container" id="separator-cards-container">
+</div>
+<div class="btn-group">
+<button class="btn btn-success btn-small" id="save-separator-btn">保存当前方案</button>
+<button class="btn btn-danger btn-small" id="clear-separators-btn">清空方案库</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div aria-hidden="true" aria-labelledby="history-modal-title" aria-modal="true" class="modal" id="history-modal" role="dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h2 class="modal-title" id="history-modal-title"><i class="fas fa-history"></i> 消费记录</h2>
+<button aria-label="关闭弹窗" class="close-modal" id="close-history-modal">×</button>
+</div>
+<div id="history-content">
+</div>
+</div>
+</div>
+<div aria-hidden="true" aria-labelledby="export-modal-title" aria-modal="true" class="modal" id="export-modal" role="dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h2 class="modal-title" id="export-modal-title"><i class="fas fa-download"></i> 导出数据</h2>
+<button aria-label="关闭弹窗" class="close-modal" id="close-export-modal">×</button>
+</div>
+<div class="backup-method-card">
+<div class="backup-method-title"><i class="fas fa-copy"></i> 复制备份数据</div>
+<p class="backup-helper-text">可复制下方 JSON 保存到其他位置，后续通过粘贴方式导入。</p>
+<textarea aria-label="导出的JSON备份数据" class="form-control backup-data-preview" id="export-data-preview" readonly></textarea>
+</div>
+<div class="backup-method-card">
+<div class="backup-method-title"><i class="fas fa-file-arrow-down"></i> 下载备份文件</div>
+<p class="backup-helper-text">下载 UTF-8 JSON 文件，可在手机或电脑中长期保存并直接导入。</p>
+</div>
+<div class="modal-footer backup-action-row">
+<button class="btn btn-primary" id="copy-export-data-btn"><i class="fas fa-copy"></i> 复制数据</button>
+<button class="btn btn-success" id="download-export-file-btn"><i class="fas fa-download"></i> 下载JSON文件</button>
+<button class="btn" id="cancel-export-btn">关闭</button>
+</div>
+</div>
+</div>
+<div aria-hidden="true" aria-labelledby="import-modal-title" aria-modal="true" class="modal" id="import-modal" role="dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h2 class="modal-title" id="import-modal-title"><i class="fas fa-upload"></i> 导入数据</h2>
+<button aria-label="关闭弹窗" class="close-modal" id="close-import-modal">×</button>
+</div>
+<div class="backup-method-card">
+<div class="backup-method-title"><i class="fas fa-file-arrow-up"></i> 从文件导入</div>
+<p class="backup-helper-text">选择由本程序导出的 JSON 文件。文件会先读取到下方预览区，确认后才会写入。</p>
+<div class="backup-file-row">
+<input accept=".json,application/json,text/json,text/plain" class="backup-file-input" id="import-file-input" type="file"/>
+<label class="btn btn-info" for="import-file-input"><i class="fas fa-folder-open"></i> 选择JSON文件</label>
+<span aria-live="polite" class="backup-file-name" id="import-file-name">尚未选择文件</span>
+</div>
+</div>
+<div class="backup-method-card">
+<div class="backup-method-title"><i class="fas fa-paste"></i> 粘贴备份数据</div>
+<label for="import-data">JSON 数据预览 / 粘贴区：</label>
+<textarea class="form-control backup-data-preview" id="import-data" placeholder='{"schemaVersion":1,"app":"CCM","config":{...},"bosses":{...}}' rows="10"></textarea>
+</div>
+<div class="modal-footer"><button class="btn btn-primary" id="confirm-import-btn">确认导入</button><button class="btn" id="cancel-import-btn">取消</button></div>
+</div>
+</div>
+<div aria-hidden="true" aria-labelledby="extract-order-modal-title" aria-modal="true" class="modal" id="extract-order-modal" role="dialog">
+<div class="modal-content extract-modal-content">
+<div class="modal-header">
+<h2 class="modal-title" id="extract-order-modal-title"><i class="fas fa-file-import"></i> 从订单提取信息</h2>
+<button aria-label="关闭弹窗" class="close-modal" id="close-extract-order-modal">×</button>
+</div>
+<div class="form-group">
+<p style="margin-bottom: 10px; color: #666;">请粘贴订单文本，例如：</p>
+<pre style="background: #f5f5f5; padding: 10px; border-radius: 5px; font-size: 12px; margin-bottom: 15px; overflow: auto;">
+派单：沫沫
+陪陪：绛于 下雪 小阳 小帆 小橘 贝斯 孤豪
+老板：小帆
+类型：同心结
+时长：
+总价：35
+团抽：3.5
+派抽：7
+到手：3.5
+备注：</pre>
+<div class="paste-button-container">
+<button class="paste-btn" id="paste-order-btn">
+<i class="fas fa-paste"></i> 一键粘贴
+                    </button>
+</div>
+<textarea class="form-control order-extract-input" id="extract-order-input" placeholder="请粘贴订单文本或直接输入..." rows="8"></textarea>
+<p class="extract-helper-text"><i class="fas fa-circle-info"></i> 有效订单需包含陪陪、类型、总价；老板名若与已保存老板完全一致，应用时会自动切换到该老板。</p>
+<div class="extract-auto-result" id="extract-auto-result">
+                    提取结果将实时显示在这里...
+                </div>
+<div class="btn-group modal-footer extract-action-row">
+<button class="btn btn-success" id="apply-order-extract-btn" disabled><i class="fas fa-check"></i> 应用到消费</button>
+<button class="btn" id="close-order-extract-btn">关闭</button>
+</div>
+</div>
+</div>
+</div>
+<div aria-hidden="true" aria-labelledby="edit-boss-modal-title" aria-modal="true" class="modal" id="edit-boss-modal" role="dialog">
+<div class="modal-content">
+<div class="modal-header">
+<h2 class="modal-title" id="edit-boss-modal-title"><i class="fas fa-user-edit"></i> 编辑老板信息</h2>
+<button aria-label="关闭弹窗" class="close-modal" id="close-edit-boss-modal">×</button>
+</div>
+<div class="edit-boss-form">
+<div class="form-group">
+<label for="edit-boss-name">老板姓名</label>
+<input class="form-control" id="edit-boss-name" type="text"/>
+</div>
+<div class="form-group">
+<label for="edit-boss-coholder">共同持卡人</label>
+<input class="form-control" id="edit-boss-coholder" type="text" value="🈚️"/>
+</div>
+<div class="form-group">
+<label for="edit-boss-initial-balance">初始余额</label>
+<input class="form-control" id="edit-boss-initial-balance" placeholder="可选，设置初始余额" type="number"/>
+</div>
+<div class="form-group">
+<label for="edit-boss-notes">备注</label>
+<textarea class="form-control" id="edit-boss-notes" placeholder="可添加老板相关备注" rows="3"></textarea>
+</div>
+<div class="btn-group modal-footer">
+<button class="btn btn-primary" id="save-boss-edit-btn">保存修改</button>
+<button class="btn" id="cancel-boss-edit-btn">取消</button>
+</div>
+</div>
+</div>
+</div>
+<div aria-hidden="true" aria-labelledby="confirm-modal-title" aria-modal="true" class="modal" id="confirm-modal" role="dialog">
+<div class="modal-content" style="max-width: 400px;">
+<div class="modal-header">
+<h2 class="modal-title" id="confirm-modal-title"><i class="fas fa-exclamation-triangle"></i> 确认操作</h2>
+<button aria-label="关闭弹窗" class="close-modal" id="close-confirm-modal">×</button>
+</div>
+<div style="padding: 20px; text-align: center;">
+<p id="confirm-message">确定要删除这位老板吗？此操作不可撤销。</p>
+<div class="btn-group modal-footer confirm-action-row">
+<button class="btn btn-danger" id="confirm-yes-btn">确定删除</button>
+<button class="btn" id="confirm-no-btn">取消</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+        class BossManager {
+            constructor() {
+                this.bosses = {};
+                this.currentBoss = null;
+                this.dataWarnings = [];
+                this.lastImportError = '';
+                this.config = {
+                    clubName: "𝑺𝒆𝒆·𝑪𝑳𝑼𝑩",
+                    autoLock: false,
+                    locked: false,
+                    separatorSettings: {
+                        mode: "single",
+                        singleSeparator: "🪻",
+                        multipleSeparators: ["🪻", "🌻", "🌼", "🍄", "🍁", "🍃", "🌱", "🎄"],
+                        locked: false,
+                        separatorSchemes: [{
+                            id: "default",
+                            name: "默认方案",
+                            mode: "single",
+                            singleSeparator: "🪻",
+                            multipleSeparators: ["🪻", "🌻", "🌼", "🍄", "🍁", "🍃", "🌱", "🎄"],
+                            isDefault: true
+                        }],
+                        currentSchemeId: "default"
+                    }
+                };
+                this.defaultConfig = this.cloneData(this.config);
+                this.currentProjects = [];
+                this.currentSeparatorIndex = 0;
+                this.loadData();
+            }
+            cloneData(value) {
+                return JSON.parse(JSON.stringify(value));
+            }
+            isPlainObject(value) {
+                return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+            }
+            normalizeText(value, maxLength = 500, trim = true) {
+                const text = value === null || value === undefined ? '' : String(value);
+                const normalized = trim ? text.trim() : text;
+                return normalized.slice(0, maxLength);
+            }
+            escapeHTML(value) {
+                return String(value ?? '').replace(/[&<>'"]/g, char => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+                }[char]));
+            }
+            roundMoney(value) {
+                const number = Number(value);
+                if (!Number.isFinite(number)) return null;
+                return Math.round((number + Number.EPSILON) * 100) / 100;
+            }
+            parseMoney(value, options = {}) {
+                const { allowZero = false, allowNegative = false } = options;
+                if (typeof value === 'string' && !value.trim()) return null;
+                const rounded = this.roundMoney(value);
+                if (rounded === null || Math.abs(rounded) > 1e12) return null;
+                if (!allowNegative && rounded < 0) return null;
+                if (!allowZero && rounded === 0) return null;
+                return rounded;
+            }
+            formatMoney(value, digits = 2) {
+                const normalized = this.parseMoney(value, { allowZero: true });
+                return (normalized === null ? 0 : normalized).toFixed(digits);
+            }
+            restoreStorageValue(key, value) {
+                try {
+                    if (value === null || value === undefined) localStorage.removeItem(key);
+                    else localStorage.setItem(key, value);
+                } catch (error) {
+                    console.error(`恢复存储 ${key} 失败:`, error);
+                }
+            }
+            getStorageValue(key) {
+                try { return localStorage.getItem(key); }
+                catch (error) {
+                    this.dataWarnings.push(`${key} 无法读取，已使用内存数据继续运行`);
+                    console.error(`读取存储 ${key} 失败:`, error);
+                    return null;
+                }
+            }
+            safeParseStorage(key, fallback) {
+                let raw = null;
+                try {
+                    raw = this.getStorageValue(key);
+                    if (raw === null) return this.cloneData(fallback);
+                    return JSON.parse(raw);
+                } catch (error) {
+                    if (raw !== null) {
+                        const backupKey = `${key}_corrupt_${Date.now()}`;
+                        try { localStorage.setItem(backupKey, raw); } catch (_) {}
+                        this.dataWarnings.push(`${key} 数据损坏，已使用安全默认值并保留损坏副本`);
+                    }
+                    console.error(`读取 ${key} 失败:`, error);
+                    return this.cloneData(fallback);
+                }
+            }
+            normalizeSeparatorScheme(raw, fallback = null, strict = false) {
+                if (!this.isPlainObject(raw)) {
+                    if (strict) throw new Error('分隔符方案格式无效');
+                    return fallback ? this.cloneData(fallback) : null;
+                }
+                const mode = raw.mode === 'multiple' ? 'multiple' : (raw.mode === 'single' ? 'single' : fallback?.mode || 'single');
+                if (strict && raw.mode !== undefined && !['single', 'multiple'].includes(raw.mode)) throw new Error('分隔符方案模式无效');
+                const id = this.normalizeText(raw.id || fallback?.id || `scheme_${Date.now()}`, 80);
+                const name = this.normalizeText(raw.name || fallback?.name || '未命名方案', 80);
+                const singleSeparator = this.normalizeText(raw.singleSeparator || fallback?.singleSeparator || '🪻', 20, false) || '🪻';
+                const sourceSeparators = Array.isArray(raw.multipleSeparators) ? raw.multipleSeparators : (fallback?.multipleSeparators || ['🪻']);
+                if (strict && raw.multipleSeparators !== undefined && !Array.isArray(raw.multipleSeparators)) throw new Error('逐个分隔符格式无效');
+                const multipleSeparators = sourceSeparators.map(item => this.normalizeText(item, 20, false)).filter(Boolean).slice(0, 50);
+                return {
+                    id,
+                    name,
+                    mode,
+                    singleSeparator,
+                    multipleSeparators: multipleSeparators.length ? multipleSeparators : ['🪻'],
+                    isDefault: Boolean(raw.isDefault || fallback?.isDefault),
+                    ...(raw.timestamp || fallback?.timestamp ? { timestamp: this.normalizeText(raw.timestamp || fallback.timestamp, 80) } : {})
+                };
+            }
+            normalizeSeparatorSettings(raw, strict = false) {
+                const fallback = this.cloneData(this.defaultConfig.separatorSettings);
+                if (raw === undefined || raw === null) return fallback;
+                if (!this.isPlainObject(raw)) {
+                    if (strict) throw new Error('分隔符设置格式无效');
+                    return fallback;
+                }
+                const result = fallback;
+                if (raw.mode !== undefined) {
+                    if (!['single', 'multiple'].includes(raw.mode)) {
+                        if (strict) throw new Error('分隔符模式无效');
+                    } else result.mode = raw.mode;
+                }
+                if (raw.singleSeparator !== undefined) result.singleSeparator = this.normalizeText(raw.singleSeparator, 20, false) || fallback.singleSeparator;
+                if (raw.multipleSeparators !== undefined) {
+                    if (!Array.isArray(raw.multipleSeparators)) {
+                        if (strict) throw new Error('逐个分隔符格式无效');
+                    } else {
+                        const list = raw.multipleSeparators.map(item => this.normalizeText(item, 20, false)).filter(Boolean).slice(0, 50);
+                        result.multipleSeparators = list.length ? list : fallback.multipleSeparators;
+                    }
+                }
+                if (raw.locked !== undefined) result.locked = Boolean(raw.locked);
+                if (raw.separatorSchemes !== undefined) {
+                    if (!Array.isArray(raw.separatorSchemes)) {
+                        if (strict) throw new Error('分隔符方案库格式无效');
+                    } else {
+                        const schemes = [];
+                        raw.separatorSchemes.slice(0, 100).forEach(item => {
+                            const normalized = this.normalizeSeparatorScheme(item, null, strict);
+                            if (normalized && !schemes.some(current => current.id === normalized.id)) schemes.push(normalized);
+                        });
+                        result.separatorSchemes = schemes;
+                    }
+                }
+                const defaultScheme = this.normalizeSeparatorScheme(fallback.separatorSchemes[0], fallback.separatorSchemes[0]);
+                if (!result.separatorSchemes.some(item => item.id === 'default')) result.separatorSchemes.unshift(defaultScheme);
+                const requestedId = this.normalizeText(raw.currentSchemeId || result.currentSchemeId, 80);
+                result.currentSchemeId = result.separatorSchemes.some(item => item.id === requestedId) ? requestedId : 'default';
+                return result;
+            }
+            normalizeConfig(raw, strict = false) {
+                const result = this.cloneData(this.defaultConfig);
+                if (raw === undefined || raw === null) return result;
+                if (!this.isPlainObject(raw)) {
+                    if (strict) throw new Error('配置格式无效');
+                    return result;
+                }
+                if (raw.clubName !== undefined) result.clubName = this.normalizeText(raw.clubName, 120) || result.clubName;
+                if (raw.autoLock !== undefined) result.autoLock = Boolean(raw.autoLock);
+                if (raw.locked !== undefined) result.locked = Boolean(raw.locked);
+                result.separatorSettings = this.normalizeSeparatorSettings(raw.separatorSettings, strict);
+                return result;
+            }
+            normalizeRecord(raw, strict = false) {
+                if (!this.isPlainObject(raw)) {
+                    if (strict) throw new Error('交易记录格式无效');
+                    return null;
+                }
+                const amount = this.parseMoney(raw.amount ?? 0, { allowZero: true });
+                if (amount === null) {
+                    if (strict) throw new Error('交易记录金额无效');
+                    return null;
+                }
+                const record = {
+                    type: this.normalizeText(raw.type || '记录', 40),
+                    amount,
+                    note: this.normalizeText(raw.note || '', 1000, false),
+                    timestamp: this.normalizeText(raw.timestamp || new Date().toLocaleString('zh-CN'), 80)
+                };
+                if (raw.project !== undefined) record.project = this.normalizeText(raw.project, 2000, false);
+                for (const field of ['before', 'after']) {
+                    if (raw[field] !== undefined) {
+                        const value = this.parseMoney(raw[field], { allowZero: true });
+                        if (value === null) {
+                            if (strict) throw new Error(`交易记录 ${field} 无效`);
+                        } else record[field] = value;
+                    }
+                }
+                return record;
+            }
+            normalizeBoss(raw, key, strict = false) {
+                if (!this.isPlainObject(raw)) {
+                    if (strict) throw new Error(`老板 ${key} 数据格式无效`);
+                    return null;
+                }
+                const name = this.normalizeText(raw.name || key, 80);
+                if (!name || ['__proto__', 'prototype', 'constructor'].includes(name)) {
+                    if (strict) throw new Error('老板姓名无效');
+                    return null;
+                }
+                const totalRecharge = this.parseMoney(raw.totalRecharge ?? 0, { allowZero: true });
+                const remaining = this.parseMoney(raw.remaining ?? 0, { allowZero: true });
+                if (totalRecharge === null || remaining === null) {
+                    if (strict) throw new Error(`老板 ${name} 金额数据无效`);
+                    return null;
+                }
+                if (raw.records !== undefined && !Array.isArray(raw.records)) {
+                    if (strict) throw new Error(`老板 ${name} 交易记录格式无效`);
+                }
+                const records = (Array.isArray(raw.records) ? raw.records : []).slice(0, 5000).map(item => this.normalizeRecord(item, strict)).filter(Boolean);
+                return {
+                    name,
+                    coHolder: this.normalizeText(raw.coHolder ?? '🈚️', 120, false),
+                    totalRecharge,
+                    remaining,
+                    notes: this.normalizeText(raw.notes ?? '', 1000, false),
+                    records,
+                    createdAt: this.normalizeText(raw.createdAt || new Date().toISOString(), 80),
+                    updatedAt: this.normalizeText(raw.updatedAt || raw.createdAt || new Date().toISOString(), 80)
+                };
+            }
+            normalizeBosses(raw, strict = false) {
+                if (!this.isPlainObject(raw)) {
+                    if (strict) throw new Error('老板数据格式无效');
+                    return {};
+                }
+                const keys = Object.keys(raw);
+                if (strict && keys.length > 50) throw new Error('老板数量超过上限');
+                const result = {};
+                keys.slice(0, 50).forEach(key => {
+                    const boss = this.normalizeBoss(raw[key], key, strict);
+                    if (!boss) return;
+                    if (Object.prototype.hasOwnProperty.call(result, boss.name)) {
+                        if (strict) throw new Error(`老板姓名重复: ${boss.name}`);
+                        return;
+                    }
+                    result[boss.name] = boss;
+                });
+                return result;
+            }
+            loadData() {
+                const savedConfig = this.safeParseStorage('clubCardConfig', this.defaultConfig);
+                const savedBosses = this.safeParseStorage('clubCardBosses', {});
+                this.config = this.normalizeConfig(savedConfig, false);
+                this.bosses = this.normalizeBosses(savedBosses, false);
+                if (this.currentBoss && !this.bosses[this.currentBoss]) this.currentBoss = null;
+                this.updateUIFromConfig();
+                return this.bosses;
+            }
+            saveData() {
+                const configKey = 'clubCardConfig';
+                const bossesKey = 'clubCardBosses';
+                const previousConfig = this.getStorageValue(configKey);
+                const previousBosses = this.getStorageValue(bossesKey);
+                try {
+                    localStorage.setItem(configKey, JSON.stringify(this.config));
+                    localStorage.setItem(bossesKey, JSON.stringify(this.bosses));
+                    this.lastSaveError = '';
+                    return true;
+                } catch (error) {
+                    this.restoreStorageValue(configKey, previousConfig);
+                    this.restoreStorageValue(bossesKey, previousBosses);
+                    this.lastSaveError = error.message || '未知错误';
+                    console.error('保存数据失败:', error);
+                    return false;
+                }
+            }
+            updateUIFromConfig() {
+                const nameInput = document.getElementById('club-name');
+                const lockBtn = document.getElementById('lock-btn');
+                const locked = this.config.locked;
+                nameInput.value = this.config.clubName;
+                document.getElementById('auto-lock').checked = this.config.autoLock;
+                nameInput.disabled = locked;
+                lockBtn.innerHTML = `<i class="fas fa-${locked ? 'unlock' : 'lock'}"></i> ${locked ? '解锁' : '锁定'}`;
+                lockBtn.classList.toggle('btn-warning', locked);
+                lockBtn.classList.toggle('btn-secondary', !locked);
+            }
+            toggleSeparatorLock() {
+                const settings = this.config.separatorSettings;
+                const previous = settings.locked;
+                settings.locked = !previous;
+                if (!this.saveData()) {
+                    settings.locked = previous;
+                    return previous;
+                }
+                return settings.locked;
+            }
+            updateSeparatorSettings(mode, value) {
+                const settings = this.config.separatorSettings;
+                if (settings.locked || !['single', 'multiple'].includes(mode)) return false;
+                const snapshot = this.cloneData(settings);
+                settings.mode = mode;
+                if (mode === 'single') {
+                    settings.singleSeparator = this.normalizeText(value, 20, false) || '🪻';
+                } else {
+                    const rawList = Array.isArray(value) ? value : String(value ?? '').split(' ');
+                    const list = rawList.map(item => this.normalizeText(item, 20, false)).filter(Boolean).slice(0, 50);
+                    settings.multipleSeparators = list.length ? list : ['🪻'];
+                }
+                if (!this.saveData()) {
+                    this.config.separatorSettings = snapshot;
+                    return false;
+                }
+                return true;
+            }
+            updateSeparatorUI() {
+                const settings = this.config.separatorSettings;
+                const singleMode = document.getElementById('separator-mode-single');
+                const multipleMode = document.getElementById('separator-mode-multiple');
+                const singleDiv = document.getElementById('single-separator-mode');
+                const multipleDiv = document.getElementById('multiple-separator-mode');
+                const lockBtn = document.getElementById('separator-lock-btn');
+                if (settings.mode === 'single') {
+                    singleMode.classList.add('active');
+                    multipleMode.classList.remove('active');
+                    singleDiv.style.display = 'block';
+                    multipleDiv.style.display = 'none';
+                    document.getElementById('single-separator').value = settings.singleSeparator;
+                } else {
+                    singleMode.classList.remove('active');
+                    multipleMode.classList.add('active');
+                    singleDiv.style.display = 'none';
+                    multipleDiv.style.display = 'block';
+                    document.getElementById('multiple-separators').value = settings.multipleSeparators.join(' ');
+                }
+                const singleInput = document.getElementById('single-separator');
+                const multipleInput = document.getElementById('multiple-separators');
+                const saveBtn = document.getElementById('save-separator-btn');
+                const clearBtn = document.getElementById('clear-separators-btn');
+                const controlButtons = [singleMode, multipleMode, saveBtn, clearBtn].filter(Boolean);
+                singleInput.disabled = multipleInput.disabled = settings.locked;
+                controlButtons.forEach(button => { button.disabled = settings.locked; });
+                document.querySelectorAll('.separator-preset').forEach(preset => {
+                    preset.style.pointerEvents = settings.locked ? 'none' : '';
+                    preset.style.opacity = settings.locked ? '0.5' : '';
+                    preset.setAttribute('aria-disabled', settings.locked ? 'true' : 'false');
+                });
+                if (settings.locked) {
+                    lockBtn.innerHTML = '<i class="fas fa-unlock"></i> 解锁';
+                    lockBtn.classList.replace('btn-warning', 'btn-danger');
+                    lockBtn.classList.add('locked');
+                } else {
+                    lockBtn.innerHTML = '<i class="fas fa-lock"></i> 锁定';
+                    lockBtn.classList.replace('btn-danger', 'btn-warning');
+                    lockBtn.classList.remove('locked');
+                }
+                this.updateSeparatorSchemesUI();
+            }
+            addSeparatorScheme(name, mode, singleSeparator, multipleSeparators) {
+                if (this.config.separatorSettings.locked) return null;
+                const settings = this.config.separatorSettings;
+                const snapshot = this.cloneData(settings);
+                const schemeId = `scheme_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+                const scheme = this.normalizeSeparatorScheme({
+                    id: schemeId,
+                    name: name || `${mode === 'single' ? '统一' : '逐个'}表情包方案`,
+                    mode,
+                    singleSeparator,
+                    multipleSeparators,
+                    timestamp: new Date().toLocaleString('zh-CN')
+                }, null, false);
+                if (!scheme) return null;
+                settings.separatorSchemes.push(scheme);
+                if (!this.saveData()) {
+                    this.config.separatorSettings = snapshot;
+                    return null;
+                }
+                this.updateSeparatorSchemesUI();
+                return scheme;
+            }
+            updateSeparatorScheme(schemeId, name, mode, singleSeparator, multipleSeparators) {
+                const settings = this.config.separatorSettings;
+                if (settings.locked || schemeId === 'default') return false;
+                const index = settings.separatorSchemes.findIndex(item => item.id === schemeId);
+                if (index < 0) return false;
+                const snapshot = this.cloneData(settings);
+                const updated = this.normalizeSeparatorScheme({
+                    ...settings.separatorSchemes[index],
+                    name,
+                    mode,
+                    singleSeparator,
+                    multipleSeparators,
+                    timestamp: new Date().toLocaleString('zh-CN')
+                }, settings.separatorSchemes[index], false);
+                if (!updated) return false;
+                settings.separatorSchemes[index] = updated;
+                if (settings.currentSchemeId === schemeId) {
+                    settings.mode = updated.mode;
+                    settings.singleSeparator = updated.singleSeparator;
+                    settings.multipleSeparators = [...updated.multipleSeparators];
+                }
+                if (!this.saveData()) {
+                    this.config.separatorSettings = snapshot;
+                    return false;
+                }
+                this.updateSeparatorUI();
+                return true;
+            }
+            deleteSeparatorScheme(schemeId) {
+                const settings = this.config.separatorSettings;
+                if (settings.locked || schemeId === 'default') return false;
+                const index = settings.separatorSchemes.findIndex(item => item.id === schemeId);
+                if (index < 0) return false;
+                const snapshot = this.cloneData(settings);
+                const deletingCurrent = settings.currentSchemeId === schemeId;
+                settings.separatorSchemes.splice(index, 1);
+                if (deletingCurrent) {
+                    const fallback = settings.separatorSchemes.find(item => item.id === 'default') || settings.separatorSchemes[0];
+                    if (!fallback) {
+                        this.config.separatorSettings = snapshot;
+                        return false;
+                    }
+                    settings.currentSchemeId = fallback.id;
+                    settings.mode = fallback.mode;
+                    settings.singleSeparator = fallback.singleSeparator;
+                    settings.multipleSeparators = [...fallback.multipleSeparators];
+                }
+                if (!this.saveData()) {
+                    this.config.separatorSettings = snapshot;
+                    return false;
+                }
+                this.updateSeparatorUI();
+                return true;
+            }
+            applySeparatorScheme(schemeId) {
+                const settings = this.config.separatorSettings;
+                if (settings.locked) return false;
+                const scheme = settings.separatorSchemes.find(item => item.id === schemeId);
+                if (!scheme) return false;
+                const snapshot = this.cloneData(settings);
+                settings.mode = scheme.mode;
+                settings.singleSeparator = scheme.singleSeparator;
+                settings.multipleSeparators = [...scheme.multipleSeparators];
+                settings.currentSchemeId = schemeId;
+                if (!this.saveData()) {
+                    this.config.separatorSettings = snapshot;
+                    return false;
+                }
+                this.updateSeparatorUI();
+                return true;
+            }
+            updateSeparatorSchemesUI() {
+                const container = document.getElementById('separator-cards-container');
+                const schemes = this.config.separatorSettings.separatorSchemes;
+                if (schemes.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 10px; color: #999; font-style: italic;">暂无分隔符号方案</div>';
+                    return;
+                }
+                container.innerHTML = schemes.map(scheme => {
+                    const isActive = this.config.separatorSettings.currentSchemeId === scheme.id;
+                    const isDefault = scheme.isDefault;
+                    let schemeDesc = scheme.mode === 'single' ?
+                        `统一: ${scheme.singleSeparator}` :
+                        `逐个: ${scheme.multipleSeparators.join(' ')}`;
+                    if (schemeDesc.length > 30) schemeDesc = schemeDesc.substring(0, 30) + '...';
+                    const encodedId = encodeURIComponent(scheme.id);
+                    return `
+                        <div class="separator-card ${isActive ? 'active' : ''}" data-scheme-id="${encodedId}">
+                            <div class="separator-card-name">
+                                <div style="font-weight: 600;">${this.escapeHTML(scheme.name)} ${isDefault ? '(默认)' : ''}</div>
+                                <div style="font-size: 12px; color: #666;">${this.escapeHTML(schemeDesc)}</div>
+                                ${scheme.timestamp ? `<div style="font-size: 10px; color: #999;">${this.escapeHTML(scheme.timestamp)}</div>` : ''}
+                            </div>
+                            <div class="separator-card-actions">
+                                ${!isDefault ? `
+                                    <button class="separator-card-btn separator-card-edit" title="编辑">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="separator-card-btn separator-card-delete" title="删除">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                container.querySelectorAll('.separator-card').forEach(card => {
+                    const schemeId = decodeURIComponent(card.dataset.schemeId || '');
+                    card.addEventListener('click', event => {
+                        if (event.target.closest('.separator-card-edit')) return;
+                        if (!event.target.closest('.separator-card-btn')) this.applySeparatorScheme(schemeId);
+                    });
+                    const editBtn = card.querySelector('.separator-card-edit');
+                    if (editBtn) {
+                        editBtn.addEventListener('click', event => {
+                            event.stopPropagation();
+                            if (this.config.separatorSettings.locked) return;
+                            if (window.app?.startSeparatorSchemeEdit) window.app.startSeparatorSchemeEdit(schemeId);
+                        });
+                    }
+                    const deleteBtn = card.querySelector('.separator-card-delete');
+                    if (deleteBtn) {
+                        deleteBtn.addEventListener('click', event => {
+                            event.stopPropagation();
+                            const scheme = this.config.separatorSettings.separatorSchemes.find(item => item.id === schemeId);
+                            const schemeName = scheme?.name || '未命名方案';
+                            if (confirm(`确定要删除方案 "${schemeName}" 吗？`)) {
+                                const deleted = this.deleteSeparatorScheme(schemeId);
+                                if (deleted && window.app?.editingSeparatorSchemeId === schemeId) window.app.resetSeparatorSchemeEdit();
+                            }
+                        });
+                    }
+                });
+            }
+            getCurrentSeparator() {
+                const settings = this.config.separatorSettings;
+                if (settings.mode === "single") {
+                    return settings.singleSeparator;
+                } else {
+                    const separators = settings.multipleSeparators;
+                    if (separators.length === 0) return "🪻";
+                    const separator = separators[this.currentSeparatorIndex % separators.length];
+                    this.currentSeparatorIndex = (this.currentSeparatorIndex + 1) % separators.length;
+                    return separator;
+                }
+            }
+            resetSeparatorIndex() {
+                this.currentSeparatorIndex = 0;
+            }
+            addBoss(name, coHolder = '🈚️', initialBalance = 0, notes = '') {
+                const cleanName = this.normalizeText(name, 80);
+                if (!cleanName) return { success: false, message: '老板姓名不能为空' };
+                if (['__proto__', 'prototype', 'constructor'].includes(cleanName)) return { success: false, message: '老板姓名无效' };
+                const balance = this.parseMoney(initialBalance, { allowZero: true });
+                if (balance === null) return { success: false, message: '初始余额必须是有效的非负金额' };
+                if (this.getBossCount() >= 50) return { success: false, message: '老板数量已达上限（50个），无法添加新老板' };
+                if (this.findBossByName(cleanName)) return { success: false, message: `老板 "${cleanName}" 已存在` };
+                this.bosses[cleanName] = {
+                    name: cleanName,
+                    coHolder: this.normalizeText(coHolder, 120, false),
+                    totalRecharge: balance,
+                    remaining: balance,
+                    notes: this.normalizeText(notes, 1000, false),
+                    records: [],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString()
+                };
+                if (!this.saveData()) {
+                    delete this.bosses[cleanName];
+                    return { success: false, message: '保存失败，未添加老板' };
+                }
+                return { success: true, message: `老板 "${cleanName}" 添加成功`, boss: this.bosses[cleanName] };
+            }
+            findBossByName(name) {
+                return this.bosses[name];
+            }
+            searchBosses(keyword) {
+                if (!keyword.trim()) return Object.keys(this.bosses);
+                const lowerKeyword = keyword.toLowerCase();
+                return Object.keys(this.bosses).filter(bossName => {
+                    const boss = this.bosses[bossName];
+                    if (bossName.toLowerCase().includes(lowerKeyword) ||
+                        this.getPinyinFirstLetters(bossName).toLowerCase().includes(lowerKeyword) ||
+                        (boss.coHolder && boss.coHolder.toLowerCase().includes(lowerKeyword)) ||
+                        (boss.notes && boss.notes.toLowerCase().includes(lowerKeyword))) {
+                        return true;
+                    }
+                    return false;
+                });
+            }
+            getPinyinFirstLetters(name) {
+                const boundaries = '阿芭擦搭蛾发噶哈击喀垃妈拿噢啪期然撒塌挖昔压匝';
+                const initials = 'abcdefghjklmnopqrstwxyz';
+                return Array.from(String(name || '')).map(char => {
+                    if (/[a-z0-9]/i.test(char)) return char.toLowerCase();
+                    if (!/[\u3400-\u9fff]/.test(char)) return '';
+                    for (let index = boundaries.length - 1; index >= 0; index -= 1) {
+                        if (char.localeCompare(boundaries[index], 'zh-CN-u-co-pinyin') >= 0) {
+                            return initials[index];
+                        }
+                    }
+                    return '';
+                }).join('');
+            }
+            updateBoss(oldName, newData) {
+                if (!this.bosses[oldName]) return { success: false, message: '老板不存在' };
+                const boss = this.bosses[oldName];
+                const nextName = this.normalizeText(newData.name || oldName, 80);
+                if (!nextName || ['__proto__', 'prototype', 'constructor'].includes(nextName)) return { success: false, message: '老板姓名无效' };
+                if (nextName !== oldName && this.bosses[nextName]) return { success: false, message: `名字 "${nextName}" 已存在` };
+                let nextBalance;
+                if (newData.initialBalance !== undefined) {
+                    nextBalance = this.parseMoney(newData.initialBalance, { allowZero: true });
+                    if (nextBalance === null) return { success: false, message: '余额必须是有效的非负金额' };
+                }
+                const target = {
+                    ...boss,
+                    name: nextName,
+                    coHolder: newData.coHolder !== undefined ? this.normalizeText(newData.coHolder, 120, false) : boss.coHolder,
+                    notes: newData.notes !== undefined ? this.normalizeText(newData.notes, 1000, false) : boss.notes,
+                    records: Array.isArray(boss.records) ? [...boss.records] : [],
+                    updatedAt: new Date().toISOString()
+                };
+                if (nextBalance !== undefined) {
+                    const balanceDiff = this.roundMoney(nextBalance - target.remaining);
+                    const nextTotal = this.roundMoney(target.totalRecharge + balanceDiff);
+                    if (balanceDiff === null || nextTotal === null || nextTotal < 0) return { success: false, message: '余额调整会产生无效金额' };
+                    const before = target.remaining;
+                    target.totalRecharge = nextTotal;
+                    target.remaining = nextBalance;
+                    if (balanceDiff !== 0) {
+                        target.records.push({
+                            type: '余额调整', amount: Math.abs(balanceDiff), note: `余额调整为 ${nextBalance}`,
+                            timestamp: new Date().toLocaleString('zh-CN'), before, after: nextBalance
+                        });
+                    }
+                }
+                const snapshot = this.cloneData(this.bosses);
+                if (nextName !== oldName) delete this.bosses[oldName];
+                this.bosses[nextName] = target;
+                if (this.currentBoss === oldName) this.currentBoss = nextName;
+                if (!this.saveData()) {
+                    this.bosses = snapshot;
+                    if (this.currentBoss === nextName) this.currentBoss = oldName;
+                    return { success: false, message: '保存失败，老板信息未修改' };
+                }
+                return {
+                    success: true,
+                    message: nextName !== oldName ? `老板信息已更新（姓名从 "${oldName}" 改为 "${nextName}"）` : '老板信息已更新',
+                    boss: this.bosses[nextName]
+                };
+            }
+            deleteBoss(name) {
+                if (!this.bosses[name]) return { success: false, message: "老板不存在" };
+                delete this.bosses[name];
+                if (this.currentBoss === name) this.currentBoss = null;
+                this.saveData();
+                return { success: true, message: `老板 "${name}" 已删除` };
+            }
+            selectBoss(name) {
+                if (this.bosses[name]) {
+                    this.currentBoss = name;
+                    return this.bosses[name];
+                }
+                return null;
+            }
+            recharge(amount, note = '') {
+                if (!this.currentBoss) return false;
+                const value = this.parseMoney(amount);
+                if (value === null) return false;
+                const boss = this.bosses[this.currentBoss];
+                const snapshot = this.cloneData(boss);
+                const before = boss.remaining;
+                boss.totalRecharge = this.roundMoney(boss.totalRecharge + value);
+                boss.remaining = this.roundMoney(boss.remaining + value);
+                boss.records.push({
+                    type: '充值', amount: value, note: this.normalizeText(note || '充值', 1000, false),
+                    timestamp: new Date().toLocaleString('zh-CN'), before, after: boss.remaining
+                });
+                boss.updatedAt = new Date().toISOString();
+                if (this.saveData()) return true;
+                this.bosses[this.currentBoss] = snapshot;
+                return false;
+            }
+            generateSingleProjectText(peiwanNames, projectType, duration = "", amount = 0, note = "") {
+                const separator = this.getCurrentSeparator();
+                const isSweet = note && note.includes("甜蜜");
+                const peiwanPart = peiwanNames.join(" ");
+                const durationPart = duration ? duration : "";
+                const sweetPart = isSweet ? "甜蜜" : "";
+                let projectText = `${separator}${peiwanPart}${sweetPart}${durationPart}${projectType} ${amount}`;
+                return projectText;
+            }
+            generateMultiProjectText(projects) {
+                if (!projects || projects.length === 0) return "";
+                this.resetSeparatorIndex();
+                const projectLines = projects.map((project, index) => {
+                    return this.generateSingleProjectText(
+                        project.peiwanNames,
+                        project.projectType,
+                        project.duration,
+                        project.amount,
+                        project.note
+                    );
+                });
+                return "\n" + projectLines.join("\n");
+            }
+            performConsumeOnly(clearAfter = true) {
+                if (!this.currentBoss) return { success: false, message: '请先选择老板' };
+                const amountInput = document.getElementById('operation-amount');
+                const hasProjects = this.currentProjects.length > 0;
+                const consumedAmount = hasProjects ? this.getCurrentProjectsTotal() : this.parseMoney(amountInput.value);
+                if (consumedAmount === null || consumedAmount <= 0) {
+                    return { success: false, message: hasProjects ? '消费项目金额无效' : '请输入有效的金额' };
+                }
+                const boss = this.bosses[this.currentBoss];
+                const snapshot = this.cloneData(boss);
+                if (boss.remaining < consumedAmount) return { success: false, message: '余额不足，消费失败' };
+                const before = boss.remaining;
+                boss.remaining = this.roundMoney(boss.remaining - consumedAmount);
+                boss.records.push({
+                    type: '消费',
+                    amount: consumedAmount,
+                    project: hasProjects
+                        ? this.generateMultiProjectText(this.currentProjects)
+                        : this.normalizeText(document.getElementById('operation-project').value || '未指定项目', 2000, false),
+                    note: this.normalizeText(document.getElementById('vip-note').value || (hasProjects ? '多项目消费' : '消费'), 1000, false),
+                    timestamp: new Date().toLocaleString('zh-CN'),
+                    before,
+                    after: boss.remaining
+                });
+                boss.updatedAt = new Date().toISOString();
+                if (!this.saveData()) {
+                    this.bosses[this.currentBoss] = snapshot;
+                    return { success: false, message: '保存失败，消费未完成' };
+                }
+                if (clearAfter) {
+                    amountInput.value = '';
+                    document.getElementById('operation-project').value = '';
+                    document.getElementById('vip-note').value = '';
+                    this.clearCurrentProjects();
+                }
+                return { success: true, message: `消费成功: ${this.formatMoney(consumedAmount)}元`, amount: consumedAmount };
+            }
+            updateBossInfo(coHolder, note = '') {
+                if (!this.currentBoss) return false;
+                const boss = this.bosses[this.currentBoss];
+                const snapshot = this.cloneData(boss);
+                boss.coHolder = this.normalizeText(coHolder, 120, false);
+                if (note) {
+                    boss.records.push({
+                        type: '信息更新', amount: 0, note: this.normalizeText(note, 1000, false),
+                        timestamp: new Date().toLocaleString('zh-CN')
+                    });
+                }
+                boss.updatedAt = new Date().toISOString();
+                if (this.saveData()) return true;
+                this.bosses[this.currentBoss] = snapshot;
+                return false;
+            }
+            updateClubName(name) {
+                const previous = this.config.clubName;
+                this.config.clubName = this.normalizeText(name, 120) || this.defaultConfig.clubName;
+                if (!this.saveData()) this.config.clubName = previous;
+                this.updateUIFromConfig();
+            }
+            toggleLock() {
+                this.config.locked = !this.config.locked;
+                if (this.config.autoLock) this.config.locked = true;
+                this.saveData();
+                this.updateUIFromConfig();
+                return this.config.locked;
+            }
+            extractOrderInfo(text) {
+                const result = {
+                    amount: 0,
+                    peiwanNames: [],
+                    projectType: "",
+                    duration: "",
+                    note: "",
+                    bossName: "",
+                    paiDan: "",
+                    isValid: false,
+                    rawText: text
+                };
+                if (!text.trim()) return result;
+                text.split('\n').map(line => line.trim()).filter(line => line).forEach(line => {
+                    const match = line.match(/^([^：:]+)[：:]\s*(.+)$/);
+                    if (match) {
+                        const key = match[1].trim();
+                        const value = match[2].trim();
+                        switch (key) {
+                            case '派单': result.paiDan = value; break;
+                            case '陪陪': result.peiwanNames = value.split(/[\s,，、]+/).filter(name => name.trim()); break;
+                            case '老板': result.bossName = value; break;
+                            case '类型': result.projectType = value; break;
+                            case '时长': result.duration = value; break;
+                            case '总价': result.amount = this.parseMoney(value, { allowZero: true }) || 0; break;
+                            case '备注': result.note = value; break;
+                        }
+                    }
+                });
+                if (result.amount === 0) {
+                    const priceMatch = text.match(/总价[：:]\s*(\d+(\.\d+)?)/);
+                    if (priceMatch) result.amount = this.parseMoney(priceMatch[1], { allowZero: true }) || 0;
+                }
+                result.isValid = result.peiwanNames.length > 0 && result.projectType !== "" && result.amount > 0;
+                return result;
+            }
+            addProjectToCurrent(projectData) {
+                const amount = this.parseMoney(projectData?.amount);
+                if (amount === null) return this.currentProjects;
+                this.currentProjects.push({
+                    ...projectData,
+                    peiwanNames: Array.isArray(projectData.peiwanNames) ? projectData.peiwanNames.map(name => this.normalizeText(name, 80)).filter(Boolean) : [],
+                    projectType: this.normalizeText(projectData.projectType, 120),
+                    duration: this.normalizeText(projectData.duration, 80),
+                    note: this.normalizeText(projectData.note, 1000, false),
+                    timestamp: this.normalizeText(projectData.timestamp || new Date().toLocaleString('zh-CN'), 80),
+                    amount
+                });
+                return this.currentProjects;
+            }
+            removeProjectFromCurrent(index) {
+                if (index >= 0 && index < this.currentProjects.length) {
+                    this.currentProjects.splice(index, 1);
+                }
+                return this.currentProjects;
+            }
+            clearCurrentProjects() {
+                this.currentProjects = [];
+                this.resetSeparatorIndex();
+                return this.currentProjects;
+            }
+            getCurrentProjectsTotal() {
+                return this.roundMoney(this.currentProjects.reduce((total, project) => {
+                    const amount = this.parseMoney(project.amount, { allowZero: true });
+                    return total + (amount === null ? 0 : amount);
+                }, 0)) || 0;
+            }
+            getCurrentProjectsCount() {
+                return this.currentProjects.length;
+            }
+            getBossList() {
+                return Object.keys(this.bosses);
+            }
+            getBossCount() {
+                return Object.keys(this.bosses).length;
+            }
+            exportData() {
+                return JSON.stringify({
+                    schemaVersion: 1,
+                    app: 'CCM',
+                    config: this.config,
+                    bosses: this.bosses,
+                    exportTime: new Date().toISOString()
+                }, null, 2);
+            }
+            importData(jsonString) {
+                const snapshot = {
+                    config: this.cloneData(this.config),
+                    bosses: this.cloneData(this.bosses),
+                    currentBoss: this.currentBoss,
+                    storedConfig: this.getStorageValue('clubCardConfig'),
+                    storedBosses: this.getStorageValue('clubCardBosses')
+                };
+                try {
+                    const data = JSON.parse(jsonString);
+                    if (!this.isPlainObject(data)) throw new Error('导入内容必须是对象');
+                    if (data.schemaVersion !== undefined && (!Number.isInteger(data.schemaVersion) || data.schemaVersion > 1)) throw new Error('不支持的备份版本');
+                    if (!Object.prototype.hasOwnProperty.call(data, 'config') || !Object.prototype.hasOwnProperty.call(data, 'bosses')) throw new Error('缺少 config 或 bosses');
+                    const nextConfig = this.normalizeConfig(data.config, true);
+                    const nextBosses = this.normalizeBosses(data.bosses, true);
+                    this.config = nextConfig;
+                    this.bosses = nextBosses;
+                    if (!this.currentBoss || !this.bosses[this.currentBoss]) this.currentBoss = null;
+                    if (!this.saveData()) throw new Error('写入本地存储失败');
+                    this.updateUIFromConfig();
+                    this.lastImportError = '';
+                    return true;
+                } catch (error) {
+                    this.config = snapshot.config;
+                    this.bosses = snapshot.bosses;
+                    this.currentBoss = snapshot.currentBoss;
+                    this.restoreStorageValue('clubCardConfig', snapshot.storedConfig);
+                    this.restoreStorageValue('clubCardBosses', snapshot.storedBosses);
+                    this.lastImportError = error.message || '未知错误';
+                    console.error('导入数据失败:', error);
+                    return false;
+                }
+            }
+        }
+        class ClubCardApp {
+            constructor() {
+                this.manager = new BossManager();
+                this.editingSeparatorSchemeId = null;
+                this.lastFocusedElement = null;
+                this.init();
+            }
+            init() {
+                this.initIconFallback();
+                this.bindEvents();
+                this.updateBossList();
+                this.updateBossCount();
+                const dataWarning = this.manager.dataWarnings[0];
+                this.showStatus(dataWarning || '系统已就绪，数据已加载', Boolean(dataWarning));
+                this.initCollapsibleSections();
+                this.updateMultiProjectUI();
+                this.manager.updateSeparatorUI();
+            }
+            initIconFallback() {
+                const root = document.documentElement;
+                const fontLink = document.getElementById('font-awesome-stylesheet');
+                const verifyFont = () => {
+                    if (!document.fonts || typeof document.fonts.check !== 'function') return;
+                    const loaded = document.fonts.check('900 16px "Font Awesome 6 Free"');
+                    root.classList.toggle('fa-fallback', !loaded);
+                };
+                if (fontLink) {
+                    fontLink.addEventListener('error', () => root.classList.add('fa-fallback'), { once: true });
+                }
+                document.addEventListener('ccm-fontawesome-loaded', () => {
+                    if (document.fonts && document.fonts.ready) {
+                        document.fonts.ready.then(verifyFont).catch(() => root.classList.add('fa-fallback'));
+                    } else {
+                        setTimeout(verifyFont, 300);
+                    }
+                }, { once: true });
+                [300, 1200, 3000].forEach(delay => setTimeout(verifyFont, delay));
+            }
+            initCollapsibleSections() {
+                const bossTitle = document.getElementById('boss-management-title');
+                const bossContent = document.getElementById('boss-management-content');
+                bossTitle.addEventListener('click', () => {
+                    bossTitle.classList.toggle('collapsed');
+                    bossContent.classList.toggle('collapsed');
+                });
+                bossTitle.classList.remove('collapsed');
+                bossContent.classList.remove('collapsed');
+            }
+            bindEvents() {
+                const $ = id => document.getElementById(id);
+                const on = (id, type, handler) => $(id).addEventListener(type, handler);
+                const clickActions = {
+                    'open-separator-settings-btn': () => this.openSeparatorSettingsModal(),
+                    'close-separator-modal': () => this.closeModal('separator-settings-modal'),
+                    'separator-mode-single': () => this.switchSeparatorMode('single'),
+                    'separator-mode-multiple': () => this.switchSeparatorMode('multiple'),
+                    'separator-lock-btn': () => {
+                        const locked = this.manager.toggleSeparatorLock();
+                        this.manager.updateSeparatorUI();
+                        this.showStatus(locked ? "分隔符号设置已锁定" : "分隔符号设置已解锁");
+                    },
+                    'save-separator-btn': () => this.saveSeparatorScheme(),
+                    'clear-separators-btn': () => {
+                        if (this.manager.config.separatorSettings.locked) return this.showStatus('请先解锁分隔符号设置', true);
+                        if (confirm("确定要清空所有分隔符号方案吗？默认方案将保留。")) {
+                            const settings = this.manager.config.separatorSettings;
+                            const snapshot = this.manager.cloneData(settings);
+                            settings.separatorSchemes = settings.separatorSchemes.filter(s => s.isDefault);
+                            const fallback = settings.separatorSchemes.find(s => s.id === 'default') || settings.separatorSchemes[0];
+                            if (fallback) {
+                                settings.currentSchemeId = fallback.id;
+                                settings.mode = fallback.mode;
+                                settings.singleSeparator = fallback.singleSeparator;
+                                settings.multipleSeparators = [...fallback.multipleSeparators];
+                            }
+                            if (!this.manager.saveData()) {
+                                this.manager.config.separatorSettings = snapshot;
+                                return this.showStatus('保存失败，方案库未清空', true);
+                            }
+                            this.resetSeparatorSchemeEdit();
+                            this.manager.updateSeparatorUI();
+                            this.showStatus("分隔符号方案库已清空（默认方案已保留）");
+                        }
+                    },
+                    'add-boss-btn': () => this.addNewBoss(),
+                    'extract-order-btn': () => this.openExtractOrderModal(),
+                    'paste-order-btn': async () => { await this.pasteFromClipboard(); },
+                    'apply-order-extract-btn': () => this.applyOrderExtract(),
+                    'close-order-extract-btn': () => this.closeModal('extract-order-modal'),
+                    'close-extract-order-modal': () => this.closeModal('extract-order-modal'),
+                    'clear-projects-btn': () => this.clearMultiProjects(),
+                    'copy-and-consume-btn': () => this.copyAndConsume(),
+                    'clear-all-inputs-btn': () => this.clearAllInputs(),
+                    'recharge-btn': () => this.performOperation('recharge'),
+                    'update-info-btn': () => this.updateBossInfo(),
+                    'view-history-btn': () => this.showHistory(),
+                    'export-data-btn': () => this.showExportModal(),
+                    'copy-export-data-btn': () => this.copyExportData(),
+                    'download-export-file-btn': () => this.downloadExportFile(),
+                    'import-data-btn': () => this.showImportModal(),
+                    'confirm-import-btn': () => this.importData(),
+                    'save-boss-edit-btn': () => this.saveBossEdit(),
+                    'confirm-yes-btn': () => {
+                        const bossName = $('confirm-modal').dataset.deletingBoss;
+                        if (bossName) this.deleteBoss(bossName);
+                    }
+                };
+                const closeHandlers = {
+                    'close-history-modal': 'history-modal',
+                    'close-export-modal': 'export-modal',
+                    'cancel-export-btn': 'export-modal',
+                    'close-import-modal': 'import-modal',
+                    'cancel-import-btn': 'import-modal',
+                    'close-edit-boss-modal': 'edit-boss-modal',
+                    'cancel-boss-edit-btn': 'edit-boss-modal',
+                    'close-confirm-modal': 'confirm-modal',
+                    'confirm-no-btn': 'confirm-modal'
+                };
+                Object.entries(clickActions).forEach(([id, handler]) => on(id, 'click', handler));
+                Object.entries(closeHandlers).forEach(([id, modalId]) => on(id, 'click', () => this.closeModal(modalId)));
+                on('club-name', 'change', e => {
+                    this.manager.updateClubName(e.target.value);
+                    this.showStatus("俱乐部名称已更新");
+                });
+                on('auto-lock', 'change', e => {
+                    this.manager.config.autoLock = e.target.checked;
+                    this.manager.saveData();
+                    this.showStatus(e.target.checked ? "已启用启动时自动锁定" : "已禁用启动时自动锁定");
+                });
+                on('lock-btn', 'click', () => {
+                    const locked = this.manager.toggleLock();
+                    this.showStatus(locked ? "俱乐部名称已锁定" : "俱乐部名称已解锁");
+                });
+                on('single-separator', 'change', e => {
+                    const updated = this.manager.updateSeparatorSettings('single', e.target.value);
+                    this.showStatus(updated ? '统一分隔表情包已更新' : '分隔符号设置已锁定或保存失败', !updated);
+                    if (!updated) this.manager.updateSeparatorUI();
+                });
+                on('multiple-separators', 'change', e => {
+                    const updated = this.manager.updateSeparatorSettings('multiple', e.target.value);
+                    this.showStatus(updated ? '逐个分隔表情包已更新' : '分隔符号设置已锁定或保存失败', !updated);
+                    if (!updated) this.manager.updateSeparatorUI();
+                });
+                on('boss-search', 'input', e => this.filterBossList(e.target.value));
+                on('import-file-input', 'change', e => this.handleImportFileSelection(e.target.files && e.target.files[0]));
+                on('extract-order-input', 'input', () => this.autoExtractOrderInfo());
+                on('vip-note', 'input', () => this.updateProjectPreview());
+                document.querySelectorAll('.separator-preset').forEach(preset => {
+                    preset.addEventListener('click', e => {
+                        if (this.manager.config.separatorSettings.locked) return this.showStatus('请先解锁分隔符号设置', true);
+                        const separator = e.currentTarget.dataset.separator;
+                        const mode = $('separator-mode-single').classList.contains('active') ? 'single' : 'multiple';
+                        const input = $(mode === 'single' ? 'single-separator' : 'multiple-separators');
+                        const updated = this.manager.updateSeparatorSettings(mode, separator);
+                        if (updated) {
+                            input.value = separator;
+                            this.showStatus('已应用预设分隔符号');
+                        } else {
+                            this.manager.updateSeparatorUI();
+                            this.showStatus('分隔符号设置保存失败', true);
+                        }
+                    });
+                });
+                window.addEventListener('click', e => {
+                    ['separator-settings-modal', 'history-modal', 'import-modal', 'extract-order-modal', 'edit-boss-modal', 'confirm-modal'].forEach(modalId => {
+                        if (e.target === $(modalId)) this.closeModal(modalId);
+                    });
+                });
+                document.addEventListener('keydown', e => {
+                    const openModal = [...document.querySelectorAll('.modal')].reverse().find(modal => modal.style.display === 'flex');
+                    if (e.key === 'Escape' && openModal) return this.closeModal(openModal.id);
+                    if (e.key === 'Tab' && openModal) {
+                        const focusable = [...openModal.querySelectorAll(
+                            'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), select:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+                        )].filter(element => element.getAttribute('aria-hidden') !== 'true' && element.getClientRects().length > 0);
+                        if (focusable.length) {
+                            const first = focusable[0];
+                            const last = focusable[focusable.length - 1];
+                            if (e.shiftKey && document.activeElement === first) {
+                                e.preventDefault();
+                                last.focus();
+                            } else if (!e.shiftKey && document.activeElement === last) {
+                                e.preventDefault();
+                                first.focus();
+                            }
+                        }
+                    }
+                    if (e.key === 'Enter' && e.target.id === 'new-boss-name') this.addNewBoss();
+                });
+            }
+            copyAndConsume() {
+                const consumeResult = this.manager.performConsumeOnly(false);
+                if (consumeResult.success) {
+                    this.generateCard();
+                    this.copyCardToClipboard().then(copied => {
+                        this.showStatus(copied ? `扣款成功并已复制: ${consumeResult.message}` : `扣款成功，但复制失败，请手动复制模板`, !copied);
+                    });
+                    const boss = this.manager.bosses[this.manager.currentBoss];
+                    document.getElementById('operation-amount').value = '';
+                    document.getElementById('operation-project').value = '';
+                    document.getElementById('vip-note').value = '';
+                    this.manager.clearCurrentProjects();
+                    this.displayBossInfo(boss);
+                    this.updateBossList();
+                    this.updateBossCount();
+                    this.updateMultiProjectUI();
+                } else {
+                    this.showStatus(consumeResult.message, true);
+                }
+            }
+            switchSeparatorMode(mode) {
+                if (this.manager.config.separatorSettings.locked) return this.showStatus('请先解锁分隔符号设置', true);
+                const inputId = mode === 'single' ? 'single-separator' : 'multiple-separators';
+                const updated = this.manager.updateSeparatorSettings(mode, document.getElementById(inputId).value);
+                if (!updated) {
+                    this.manager.updateSeparatorUI();
+                    return this.showStatus('分隔符号模式切换失败', true);
+                }
+                this.manager.updateSeparatorUI();
+                this.showStatus(mode === 'single' ? '已切换到统一表情包模式' : '已切换到逐个表情包模式');
+            }
+            filterBossList(keyword) {
+                const allBosses = this.manager.getBossList();
+                if (!keyword.trim()) {
+                    this.updateBossListUI(allBosses);
+                    return;
+                }
+                const filteredBosses = this.manager.searchBosses(keyword);
+                this.updateBossListUI(filteredBosses);
+            }
+            updateBossListUI(bossNames) {
+                const bossList = document.getElementById('boss-list');
+                const bossStats = document.getElementById('boss-stats');
+                if (bossNames.length === 0) {
+                    bossList.innerHTML = '<div class="no-bosses">未找到匹配的老板</div>';
+                    bossStats.textContent = '搜索到 0 位老板';
+                    return;
+                }
+                bossList.innerHTML = bossNames.map(bossName => {
+                    const boss = this.manager.bosses[bossName];
+                    const isSelected = this.manager.currentBoss === bossName;
+                    return `
+                        <div class="boss-item ${isSelected ? 'selected' : ''}" data-boss="${encodeURIComponent(bossName)}">
+                            <div style="flex: 1; min-width: 0;">
+                                <div class="name">${this.escapeHTML(boss.name)}</div>
+                                <div class="balance">余额: ${this.manager.formatMoney(boss.remaining)} | 总充值: ${this.manager.formatMoney(boss.totalRecharge)}</div>
+                            </div>
+                            <div class="boss-item-actions">
+                                <button class="boss-action-btn boss-edit-btn" title="编辑"><i class="fas fa-edit"></i></button>
+                                <button class="boss-action-btn boss-delete-btn" title="删除"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+                bossList.onclick = event => {
+                    const item = event.target.closest('.boss-item');
+                    if (!item) return;
+                    const bossName = decodeURIComponent(item.dataset.boss || '');
+                    if (event.target.closest('.boss-edit-btn')) return this.editBoss(bossName);
+                    if (event.target.closest('.boss-delete-btn')) return this.confirmDeleteBoss(bossName);
+                    this.selectBoss(bossName);
+                };
+                bossStats.textContent = `搜索到 ${bossNames.length} 位老板`;
+            }
+            updateBossList() {
+                const bossNames = this.manager.getBossList();
+                this.updateBossListUI(bossNames);
+            }
+            addNewBoss() {
+                const nameInput = document.getElementById('new-boss-name');
+                const name = nameInput.value.trim();
+                if (!name) {
+                    this.showStatus("请输入老板姓名", true);
+                    return;
+                }
+                const result = this.manager.addBoss(name);
+                if (result.success) {
+                    this.updateBossList();
+                    this.updateBossCount();
+                    nameInput.value = '';
+                    this.showStatus(result.message);
+                    this.selectBoss(name);
+                } else {
+                    this.showStatus(result.message, true);
+                }
+            }
+            selectBoss(bossName) {
+                const boss = this.manager.selectBoss(bossName);
+                if (boss) {
+                    this.updateBossList();
+                    this.displayBossInfo(boss);
+                    this.showStatus(`已选择老板: ${boss.name}`);
+                    document.getElementById('co-holder').value = boss.coHolder;
+                }
+            }
+            displayBossInfo(boss) {
+                const safeBoss = boss && typeof boss === 'object' ? boss : {};
+                document.getElementById('current-boss-info').innerHTML = `
+                    <div class="boss-info-grid">
+                        <div class="boss-info-item">
+                            <div class="label">老板姓名</div>
+                            <div class="value">${this.escapeHTML(safeBoss.name || '-')}</div>
+                        </div>
+                        <div class="boss-info-item">
+                            <div class="label">共同持卡人</div>
+                            <div class="value">${this.escapeHTML(safeBoss.coHolder || '-')}</div>
+                        </div>
+                        <div class="boss-info-item">
+                            <div class="label">VIP总充值</div>
+                            <div class="value">${safeBoss.totalRecharge === '-' || safeBoss.totalRecharge === undefined ? '-' : this.manager.formatMoney(safeBoss.totalRecharge)}</div>
+                        </div>
+                        <div class="boss-info-item">
+                            <div class="label">剩余金额</div>
+                            <div class="value">${safeBoss.remaining === '-' || safeBoss.remaining === undefined ? '-' : this.manager.formatMoney(safeBoss.remaining)}</div>
+                        </div>
+                    </div>
+                `;
+            }
+            editBoss(bossName) {
+                const boss = this.manager.bosses[bossName];
+                if (!boss) return;
+                document.getElementById('edit-boss-name').value = boss.name;
+                document.getElementById('edit-boss-coholder').value = boss.coHolder;
+                document.getElementById('edit-boss-initial-balance').value = '';
+                document.getElementById('edit-boss-notes').value = boss.notes || '';
+                document.getElementById('edit-boss-modal').dataset.editingBoss = bossName;
+                this.openModal('edit-boss-modal');
+            }
+            saveBossEdit() {
+                const oldName = document.getElementById('edit-boss-modal').dataset.editingBoss;
+                const newName = document.getElementById('edit-boss-name').value.trim();
+                const coHolder = document.getElementById('edit-boss-coholder').value.trim();
+                const initialBalance = document.getElementById('edit-boss-initial-balance').value;
+                const notes = document.getElementById('edit-boss-notes').value.trim();
+                if (!newName) {
+                    this.showStatus("老板姓名不能为空", true);
+                    return;
+                }
+                const result = this.manager.updateBoss(oldName, {
+                    name: newName,
+                    coHolder: coHolder,
+                    initialBalance: initialBalance === '' ? undefined : initialBalance,
+                    notes: notes
+                });
+                if (result.success) {
+                    this.updateBossList();
+                    this.updateBossCount();
+                    if (this.manager.currentBoss === newName || (oldName === this.manager.currentBoss && newName !== oldName)) {
+                        this.displayBossInfo(result.boss);
+                        document.getElementById('co-holder').value = result.boss.coHolder;
+                    }
+                    this.closeModal('edit-boss-modal');
+                    this.showStatus(result.message);
+                } else {
+                    this.showStatus(result.message, true);
+                }
+            }
+            confirmDeleteBoss(bossName) {
+                const boss = this.manager.bosses[bossName];
+                if (!boss) return;
+                document.getElementById('confirm-message').textContent = `确定要删除老板 "${bossName}" 吗？此操作不可撤销。`;
+                document.getElementById('confirm-modal').dataset.deletingBoss = bossName;
+                this.openModal('confirm-modal');
+            }
+            deleteBoss(bossName) {
+                const wasCurrentBoss = this.manager.currentBoss === bossName;
+                const result = this.manager.deleteBoss(bossName);
+                if (result.success) {
+                    this.updateBossList();
+                    this.updateBossCount();
+                    if (wasCurrentBoss) {
+                        this.displayBossInfo(null);
+                        document.getElementById('co-holder').value = '🈚️';
+                        document.getElementById('operation-amount').value = '';
+                        document.getElementById('operation-project').value = '';
+                        document.getElementById('vip-note').value = '';
+                    }
+                    delete document.getElementById('confirm-modal').dataset.deletingBoss;
+                    this.closeModal('confirm-modal');
+                    this.showStatus(result.message);
+                } else {
+                    this.showStatus(result.message, true);
+                }
+            }
+            openSeparatorSettingsModal() {
+                this.resetSeparatorSchemeEdit();
+                this.manager.updateSeparatorUI();
+                this.openModal('separator-settings-modal');
+            }
+            startSeparatorSchemeEdit(schemeId) {
+                const settings = this.manager.config.separatorSettings;
+                if (settings.locked) return this.showStatus('请先解锁分隔符号设置', true);
+                const scheme = settings.separatorSchemes.find(item => item.id === schemeId);
+                if (!scheme || scheme.isDefault) return this.showStatus('默认方案不可直接编辑', true);
+                if (!this.manager.applySeparatorScheme(schemeId)) return this.showStatus('方案载入失败', true);
+                this.editingSeparatorSchemeId = schemeId;
+                const saveBtn = document.getElementById('save-separator-btn');
+                saveBtn.innerHTML = '<i class="fas fa-save"></i> 保存修改';
+                this.showStatus(`已载入方案 "${scheme.name}"，修改后点击保存`);
+            }
+            resetSeparatorSchemeEdit() {
+                this.editingSeparatorSchemeId = null;
+                const saveBtn = document.getElementById('save-separator-btn');
+                if (saveBtn) saveBtn.innerHTML = '<i class="fas fa-save"></i> 保存当前方案';
+            }
+            saveSeparatorScheme() {
+                const settings = this.manager.config.separatorSettings;
+                if (settings.locked) return this.showStatus('请先解锁分隔符号设置', true);
+                const mode = settings.mode;
+                const singleSeparator = document.getElementById('single-separator').value;
+                const multipleSeparators = document.getElementById('multiple-separators').value;
+                const editingScheme = settings.separatorSchemes.find(item => item.id === this.editingSeparatorSchemeId);
+                const defaultName = editingScheme?.name || `${mode === 'single' ? '统一' : '逐个'}表情包方案`;
+                const schemeName = prompt(editingScheme ? '请输入修改后的方案名称:' : '请输入方案名称:', defaultName);
+                if (!schemeName?.trim()) return;
+                const list = mode === 'multiple' ? multipleSeparators.split(' ').filter(item => item.trim()) : [];
+                if (editingScheme) {
+                    const updated = this.manager.updateSeparatorScheme(editingScheme.id, schemeName, mode, singleSeparator, list);
+                    if (!updated) return this.showStatus('方案修改失败', true);
+                    this.resetSeparatorSchemeEdit();
+                    this.showStatus(`分隔符号方案 "${schemeName.trim()}" 已更新`);
+                    return;
+                }
+                const scheme = this.manager.addSeparatorScheme(schemeName, mode, singleSeparator, list);
+                if (!scheme) return this.showStatus('方案保存失败', true);
+                this.showStatus(`分隔符号方案 "${scheme.name}" 已保存`);
+            }
+            async pasteFromClipboard() {
+                if (navigator.clipboard?.readText) {
+                    try {
+                        const text = await navigator.clipboard.readText();
+                        document.getElementById('extract-order-input').value = text;
+                        this.autoExtractOrderInfo();
+                        this.showStatus('已从剪贴板粘贴内容');
+                    } catch {
+                        this.showStatus('无法读取剪贴板，请手动粘贴', true);
+                        document.getElementById('extract-order-input').focus();
+                    }
+                } else {
+                    this.showStatus('请手动粘贴内容到输入框');
+                    document.getElementById('extract-order-input').focus();
+                }
+            }
+            openExtractOrderModal() {
+                document.getElementById('extract-order-input').value = '';
+                const resultContainer = document.getElementById('extract-auto-result');
+                resultContainer.innerHTML = '提取结果将实时显示在这里...';
+                resultContainer.classList.remove('active');
+                delete document.getElementById('extract-order-modal').dataset.extractedResult;
+                this.setExtractApplyEnabled(false);
+                this.openModal('extract-order-modal');
+            }
+            setExtractApplyEnabled(enabled) {
+                const btn = document.getElementById('apply-order-extract-btn');
+                btn.disabled = !enabled;
+                btn.title = enabled ? '应用提取结果到当前消费项目' : '请先粘贴并提取有效订单';
+            }
+            escapeHTML(value) {
+                return String(value ?? '').replace(/[&<>'"]/g, char => ({
+                    '&': '&amp;',
+                    '<': '&lt;',
+                    '>': '&gt;',
+                    "'": '&#39;',
+                    '"': '&quot;'
+                }[char]));
+            }
+            getExtractBossMatch(bossName) {
+                const name = (bossName || '').trim();
+                return name && this.manager.findBossByName(name) ? this.manager.findBossByName(name) : null;
+            }
+            buildExtractProjectPreview(result) {
+                const settings = this.manager.config.separatorSettings;
+                const separator = settings.mode === 'single' ? settings.singleSeparator : (settings.multipleSeparators[0] || '🪻');
+                const sweetPart = result.note && result.note.includes('甜蜜') ? '甜蜜' : '';
+                return `${separator}${result.peiwanNames.join(' ')}${sweetPart}${result.duration || ''}${result.projectType} ${result.amount}`;
+            }
+            renderExtractResult(result) {
+                const bossName = result.bossName || '';
+                const bossMatch = this.getExtractBossMatch(bossName);
+                const warnings = [];
+                if (bossName && !bossMatch) warnings.push(`订单老板“${this.escapeHTML(bossName)}”未在老板库中精确匹配，应用后不会自动切换老板。`);
+                if (!bossName) warnings.push('订单未提取到老板名，应用后请手动确认当前老板。');
+                if (result.note && result.note.includes('甜蜜')) warnings.push('已识别甜蜜模式，消费项目会自动追加“甜蜜”。');
+                const fields = [
+                    ['派单', result.paiDan || '未提取'],
+                    ['老板', bossName ? `${bossName}${bossMatch ? '（已匹配）' : '（未匹配）'}` : '未提取'],
+                    ['陪陪', result.peiwanNames.join('、')],
+                    ['类型', result.projectType],
+                    ['时长', result.duration || '未提取'],
+                    ['总价', result.amount],
+                    ['备注', result.note || '无', 'full']
+                ].map(([label, value, cls]) => `
+                    <div class="extract-field ${cls || ''}">
+                        <div class="extract-field-label">${this.escapeHTML(label)}</div>
+                        <div class="extract-field-value">${this.escapeHTML(value)}</div>
+                    </div>
+                `).join('');
+                const preview = this.escapeHTML(this.buildExtractProjectPreview(result));
+                const warningHtml = warnings.length ? `
+                    <ul class="extract-warning-list">
+                        ${warnings.map(item => `<li>${item}</li>`).join('')}
+                    </ul>
+                ` : '';
+                return `
+                    <div class="extract-result-card">
+                        <div class="extract-result-head">
+                            <span>✅ 成功提取订单信息</span>
+                            <span class="extract-status-pill ${bossMatch ? 'ok' : 'warn'}">${bossMatch ? '老板已匹配' : '需确认老板'}</span>
+                        </div>
+                        <div class="extract-result-grid">${fields}</div>
+                        <div>
+                            <div class="extract-field-label">消费项目预览</div>
+                            <div class="extract-preview-line">${preview}</div>
+                        </div>
+                        ${warningHtml}
+                    </div>
+                `;
+            }
+            renderExtractError(result) {
+                const missing = [];
+                if (!result.peiwanNames.length) missing.push('陪陪');
+                if (!result.projectType) missing.push('类型');
+                if (!result.amount || result.amount <= 0) missing.push('总价');
+                return `
+                    <div class="extract-result-card">
+                        <div class="extract-result-head">
+                            <span>❌ 暂未提取到有效订单</span>
+                            <span class="extract-status-pill error">缺少 ${this.escapeHTML(missing.join(' / ') || '关键信息')}</span>
+                        </div>
+                        <div class="extract-preview-line">
+                            需要包含：派单、陪陪、老板、类型、总价、备注等字段；其中陪陪、类型、总价为应用到消费的必要信息。
+                        </div>
+                    </div>
+                `;
+            }
+            autoExtractOrderInfo() {
+                const text = document.getElementById('extract-order-input').value.trim();
+                const resultContainer = document.getElementById('extract-auto-result');
+                const modal = document.getElementById('extract-order-modal');
+                if (!text) {
+                    resultContainer.innerHTML = '提取结果将实时显示在这里...';
+                    resultContainer.classList.remove('active');
+                    delete modal.dataset.extractedResult;
+                    this.setExtractApplyEnabled(false);
+                    return;
+                }
+                const result = this.manager.extractOrderInfo(text);
+                resultContainer.innerHTML = result.isValid ? this.renderExtractResult(result) : this.renderExtractError(result);
+                resultContainer.classList.add('active');
+                if (result.isValid) {
+                    modal.dataset.extractedResult = JSON.stringify(result);
+                    this.setExtractApplyEnabled(true);
+                } else {
+                    delete modal.dataset.extractedResult;
+                    this.setExtractApplyEnabled(false);
+                }
+            }
+            applyOrderExtract() {
+                const resultJson = document.getElementById('extract-order-modal').dataset.extractedResult;
+                if (!resultJson) {
+                    this.showStatus('请先提取订单信息', true);
+                    return;
+                }
+                const result = JSON.parse(resultJson);
+                const note = document.getElementById('vip-note').value || result.note;
+                const hasExistingProjects = this.manager.currentProjects.length > 0;
+                let bossStatus = '';
+                if (result.bossName) {
+                    const bossMatch = this.getExtractBossMatch(result.bossName);
+                    if (bossMatch) {
+                        this.selectBoss(result.bossName);
+                        bossStatus = `，已自动选择老板：${result.bossName}`;
+                    } else {
+                        bossStatus = '，老板未匹配，请手动确认';
+                    }
+                }
+                const projectData = {
+                    peiwanNames: result.peiwanNames,
+                    projectType: result.projectType,
+                    duration: result.duration,
+                    amount: result.amount,
+                    note: note,
+                    timestamp: new Date().toLocaleString('zh-CN')
+                };
+                this.manager.addProjectToCurrent(projectData);
+                this.updateMultiProjectUI();
+                document.getElementById('multi-project-container').style.display = 'block';
+                const totalAmount = this.manager.getCurrentProjectsTotal();
+                document.getElementById('operation-amount').value = totalAmount;
+                this.closeModal('extract-order-modal');
+                this.showStatus(`已${hasExistingProjects ? '添加到' : '创建'}多消费项目，当前共 ${this.manager.getCurrentProjectsCount()} 个项目${bossStatus}`);
+                this.updateProjectPreview();
+            }
+            updateMultiProjectUI() {
+                const container = document.getElementById('multi-project-list');
+                const totalElement = document.getElementById('multi-project-total');
+                const summaryElement = document.getElementById('project-summary');
+                const projects = this.manager.currentProjects;
+                const totalAmount = this.manager.getCurrentProjectsTotal();
+                const projectsCount = this.manager.getCurrentProjectsCount();
+                totalElement.textContent = this.manager.formatMoney(totalAmount);
+                if (projects.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 10px; color: #999; font-style: italic;">暂无消费项目</div>';
+                    document.getElementById('multi-project-container').style.display = 'none';
+                    return;
+                }
+                container.innerHTML = projects.map((project, index) => {
+                    const sweetBadge = project.note && project.note.includes('甜蜜') ? '<span class="sweet-mode-indicator">甜蜜</span>' : '';
+                    const names = Array.isArray(project.peiwanNames) ? project.peiwanNames.join(' ') : '';
+                    return `
+                        <div class="multi-project-item">
+                            <div class="multi-project-details">
+                                <div style="font-weight: 500;">${this.escapeHTML(names)} - ${this.escapeHTML(project.projectType)}${sweetBadge}</div>
+                                <div style="font-size: 11px; color: #666;">${project.duration ? `时长: ${this.escapeHTML(project.duration)} | ` : ''}金额: ${this.manager.formatMoney(project.amount)} | ${this.escapeHTML(project.timestamp)}</div>
+                            </div>
+                            <div class="multi-project-amount">${this.manager.formatMoney(project.amount)}</div>
+                            <div class="multi-project-actions">
+                                <button class="multi-project-action-btn multi-project-remove-btn" data-index="${index}" title="删除"><i class="fas fa-times"></i></button>
+                            </div>
+                        </div>`;
+                }).join('');
+                container.onclick = event => {
+                    const btn = event.target.closest('.multi-project-remove-btn');
+                    if (btn) this.removeMultiProject(parseInt(btn.dataset.index, 10));
+                };
+                const separatorMode = this.manager.config.separatorSettings.mode;
+                summaryElement.textContent = `当前项目: ${projectsCount}个 | 分隔模式: ${separatorMode === 'single' ? '统一表情包' : '逐个表情包'}`;
+                document.getElementById('multi-project-container').style.display = 'block';
+            }
+            removeMultiProject(index) {
+                this.manager.removeProjectFromCurrent(index);
+                this.updateMultiProjectUI();
+                const totalAmount = this.manager.getCurrentProjectsTotal();
+                document.getElementById('operation-amount').value = totalAmount || '';
+                this.showStatus(`已删除消费项目，剩余 ${this.manager.getCurrentProjectsCount()} 个项目`);
+                this.updateProjectPreview();
+            }
+            clearMultiProjects() {
+                this.manager.clearCurrentProjects();
+                this.updateMultiProjectUI();
+                document.getElementById('operation-amount').value = '';
+                document.getElementById('operation-project').value = '';
+                this.showStatus('已清空所有消费项目');
+            }
+            updateProjectPreview() {
+                const projects = this.manager.currentProjects;
+                if (projects.length > 0) {
+                    const projectText = this.manager.generateMultiProjectText(projects);
+                    document.getElementById('operation-project').value = projectText.replace(/\n/g, ' ');
+                } else {
+                    const currentValue = document.getElementById('operation-project').value;
+                    if (!currentValue) {
+                        document.getElementById('operation-project').placeholder = "消费项目将自动生成";
+                    }
+                }
+            }
+            performOperation(type) {
+                if (!this.manager.currentBoss) {
+                    this.showStatus("请先选择一位老板", true);
+                    return;
+                }
+                let amountInput = document.getElementById('operation-amount');
+                let amount = this.manager.parseMoney(amountInput.value);
+                if (amount === null) {
+                    this.showStatus("请输入有效的金额", true);
+                    return;
+                }
+                if (type === 'recharge') {
+                    const note = document.getElementById('vip-note').value;
+                    const success = this.manager.recharge(amount, note);
+                    if (success) {
+                        const boss = this.manager.bosses[this.manager.currentBoss];
+                        this.displayBossInfo(boss);
+                        this.updateBossList();
+                        this.updateBossCount();
+                        this.generateCard('recharge');
+                        amountInput.value = '';
+                        this.showStatus(`充值成功: ${amount}元，模板已生成`);
+                    } else {
+                        this.showStatus("充值失败", true);
+                    }
+                }
+            }
+            updateBossInfo() {
+                if (!this.manager.currentBoss) {
+                    this.showStatus("请先选择一位老板", true);
+                    return;
+                }
+                const coHolder = document.getElementById('co-holder').value;
+                const note = document.getElementById('vip-note').value;
+                const success = this.manager.updateBossInfo(coHolder, note);
+                if (success) {
+                    this.showStatus("老板信息已更新");
+                    const boss = this.manager.bosses[this.manager.currentBoss];
+                    this.displayBossInfo(boss);
+                    this.updateBossList();
+                    this.generateCard();
+                }
+            }
+            generateCard(mode = '') {
+                if (!this.manager.currentBoss) {
+                    this.showStatus("请先选择一位老板", true);
+                    return;
+                }
+                const boss = this.manager.bosses[this.manager.currentBoss];
+                const clubName = this.manager.config.clubName;
+                const simpleClubName = clubName.split('·')[0] || clubName;
+                const now = new Date();
+                const dateStr = `${now.getFullYear()}.${(now.getMonth()+1).toString().padStart(2, '0')}.${now.getDate().toString().padStart(2, '0')}`;
+                const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+                const amountInput = document.getElementById('operation-amount').value;
+                const vipNoteInput = document.getElementById('vip-note').value;
+                const exchangeCoinInput = document.getElementById('exchange-coin').value;
+                let projectText = "";
+                if (mode !== 'recharge') {
+                    projectText = this.manager.currentProjects.length > 0
+                        ? this.manager.generateMultiProjectText(this.manager.currentProjects)
+                        : (document.getElementById('operation-project').value ? "\n" + document.getElementById('operation-project').value : "");
+                }
+                let cardContent = `🐾⋆⁺🍥ᨳ ${clubName} ໒꒱⁺⋆🍥🐾
+   🍧尊贵的𝐕𝐈𝐏会员：${boss.name}
+      🍡共同持卡人：${boss.coHolder}
+       👛𝐕𝐈𝐏总充值：${boss.totalRecharge.toFixed(0)}
+        💒本次充值：${amountInput && mode === 'recharge' ? amountInput : ''}
+        🌷本次消费：${amountInput && mode !== 'recharge' && projectText ? amountInput : ''}
+        🎀消费项目：${projectText}
+        🎡剩余金额：${boss.remaining.toFixed(0)}
+        🎟️𝐕𝐈𝐏存单：${vipNoteInput}
+        💎兑换币：${exchangeCoinInput}
+  ━━･❪ ${clubName}专属 ❫ ･━━
+     ☪︎感谢𝐕𝐈𝐏会员：${boss.name}
+      对 ${simpleClubName} 的支持与厚爱🍧
+       ${dateStr}  ${timeStr}
+ 🍥:;*─═🍧:;*─═🍡:;*─═🍥`;
+                document.getElementById('card-content').textContent = cardContent;
+                this.showStatus("扣卡模板已生成");
+            }
+            copyCardToClipboard() {
+                if (!this.manager.currentBoss) return Promise.resolve(false);
+                const cardContent = document.getElementById('card-content').textContent;
+                const fallbackCopy = () => new Promise((resolve, reject) => {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = cardContent;
+                    textarea.setAttribute('readonly', 'readonly');
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.focus();
+                    textarea.select();
+                    try {
+                        document.execCommand('copy') ? resolve() : reject(new Error('execCommand copy failed'));
+                    } catch (err) {
+                        reject(err);
+                    } finally {
+                        document.body.removeChild(textarea);
+                    }
+                });
+                const copyTask = navigator.clipboard && navigator.clipboard.writeText ?
+                    navigator.clipboard.writeText(cardContent).catch(() => fallbackCopy()) :
+                    fallbackCopy();
+                return copyTask.then(() => true).catch(err => {
+                    console.error('复制失败: ', err);
+                    return false;
+                });
+            }
+            clearAllInputs() {
+                document.getElementById('operation-amount').value = '';
+                document.getElementById('operation-project').value = '';
+                document.getElementById('vip-note').value = '';
+                document.getElementById('exchange-coin').value = '';
+                this.manager.clearCurrentProjects();
+                this.updateMultiProjectUI();
+                this.showStatus("已清除所有消费/充值输入框内容");
+            }
+            showHistory() {
+                if (!this.manager.currentBoss) {
+                    this.showStatus('请先选择一位老板', true);
+                    return;
+                }
+                const boss = this.manager.bosses[this.manager.currentBoss];
+                const historyContent = document.getElementById('history-content');
+                let html = `<h3>${this.escapeHTML(boss.name)} 的交易记录</h3>`;
+                html += `<p>总记录数: ${boss.records.length}</p>`;
+                if (boss.records.length === 0) {
+                    html += '<p style="text-align: center; padding: 40px 20px; color: #999;">暂无记录</p>';
+                } else {
+                    html += '<div class="history-list">';
+                    [...boss.records].reverse().forEach(record => {
+                        const amountClass = record.type === '充值' ? 'recharge' : 'consumption';
+                        const amountSign = record.type === '充值' ? '+' : '-';
+                        const detail = record.note || record.project || '';
+                        const balance = record.before !== undefined && record.after !== undefined
+                            ? `<div style="font-size: 12px; color: #777;">余额: ${this.manager.formatMoney(record.before)} → ${this.manager.formatMoney(record.after)}</div>` : '';
+                        html += `
+                        <div class="history-item">
+                            <div class="history-details">
+                                <strong>${this.escapeHTML(record.type)}</strong> - ${this.escapeHTML(detail)}
+                                <div style="font-size: 12px; color: #777;">${this.escapeHTML(record.timestamp)}</div>
+                                ${balance}
+                            </div>
+                            <div class="history-amount ${amountClass}">${amountSign}${this.manager.formatMoney(record.amount)}</div>
+                        </div>`;
+                    });
+                    html += '</div>';
+                }
+                historyContent.innerHTML = html;
+                this.openModal('history-modal');
+            }
+            exportData() {
+                this.showExportModal();
+            }
+            getExportFileName() {
+                const date = new Date().toISOString().slice(0, 10);
+                return `CCM备份_${date}.json`;
+            }
+            showExportModal() {
+                const preview = document.getElementById('export-data-preview');
+                preview.value = this.manager.exportData();
+                this.openModal('export-modal');
+            }
+            copyTextToClipboard(text) {
+                const fallbackCopy = () => new Promise((resolve, reject) => {
+                    const textarea = document.createElement('textarea');
+                    textarea.value = text;
+                    textarea.setAttribute('readonly', 'readonly');
+                    textarea.style.position = 'fixed';
+                    textarea.style.opacity = '0';
+                    document.body.appendChild(textarea);
+                    textarea.focus();
+                    textarea.select();
+                    try {
+                        document.execCommand('copy') ? resolve() : reject(new Error('execCommand copy failed'));
+                    } catch (error) {
+                        reject(error);
+                    } finally {
+                        document.body.removeChild(textarea);
+                    }
+                });
+                return navigator.clipboard && navigator.clipboard.writeText
+                    ? navigator.clipboard.writeText(text).catch(() => fallbackCopy())
+                    : fallbackCopy();
+            }
+            copyExportData() {
+                const data = document.getElementById('export-data-preview').value || this.manager.exportData();
+                return this.copyTextToClipboard(data)
+                    .then(() => {
+                        this.showStatus('备份数据已复制');
+                        return true;
+                    })
+                    .catch(error => {
+                        console.error('复制备份失败:', error);
+                        this.showStatus('复制失败，请手动选择文本复制', true);
+                        return false;
+                    });
+            }
+            downloadExportFile() {
+                const data = document.getElementById('export-data-preview').value || this.manager.exportData();
+                const blob = new Blob(['\uFEFF', data], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = this.getExportFileName();
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                setTimeout(() => URL.revokeObjectURL(url), 0);
+                this.showStatus('JSON备份文件已下载');
+            }
+            resetImportFileState() {
+                const input = document.getElementById('import-file-input');
+                const name = document.getElementById('import-file-name');
+                if (input) input.value = '';
+                if (name) {
+                    name.textContent = '尚未选择文件';
+                    name.classList.remove('loaded');
+                }
+            }
+            showImportModal() {
+                this.resetImportFileState();
+                this.openModal('import-modal');
+            }
+            readTextFile(file) {
+                if (file && typeof file.text === 'function') return file.text();
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(String(reader.result || ''));
+                    reader.onerror = () => reject(reader.error || new Error('文件读取失败'));
+                    reader.readAsText(file, 'utf-8');
+                });
+            }
+            async handleImportFileSelection(file) {
+                const fileName = document.getElementById('import-file-name');
+                if (!file) {
+                    this.resetImportFileState();
+                    return;
+                }
+                const normalizedName = String(file.name || '').trim();
+                const lowerName = normalizedName.toLowerCase();
+                const acceptedType = !file.type || ['application/json', 'text/json', 'text/plain'].includes(file.type);
+                if ((!lowerName.endsWith('.json') && !lowerName.endsWith('.txt')) || !acceptedType) {
+                    this.resetImportFileState();
+                    this.showStatus('请选择 JSON 备份文件', true);
+                    return;
+                }
+                if (!Number.isFinite(file.size) || file.size <= 0 || file.size > 5 * 1024 * 1024) {
+                    this.resetImportFileState();
+                    this.showStatus('备份文件必须大于0且不超过5MB', true);
+                    return;
+                }
+                try {
+                    const content = (await this.readTextFile(file)).replace(/^\uFEFF/, '');
+                    if (!content.trim()) throw new Error('文件内容为空');
+                    JSON.parse(content);
+                    document.getElementById('import-data').value = content;
+                    fileName.textContent = `已读取：${normalizedName}`;
+                    fileName.classList.add('loaded');
+                    this.showStatus('备份文件已读取，请确认导入');
+                } catch (error) {
+                    console.error('读取备份文件失败:', error);
+                    this.resetImportFileState();
+                    this.showStatus(`文件读取失败：${error.message || '格式无效'}`, true);
+                }
+            }
+            importData() {
+                const importDataText = document.getElementById('import-data').value;
+                if (!importDataText.trim()) {
+                    this.showStatus("请输入要导入的数据", true);
+                    return;
+                }
+                const success = this.manager.importData(importDataText);
+                if (success) {
+                    this.updateBossList();
+                    this.updateBossCount();
+                    document.getElementById('import-data').value = '';
+                    this.resetImportFileState();
+                    this.closeModal('import-modal');
+                    this.showStatus("数据导入成功");
+                    if (this.manager.currentBoss && this.manager.bosses[this.manager.currentBoss]) {
+                        const boss = this.manager.bosses[this.manager.currentBoss];
+                        this.displayBossInfo(boss);
+                    } else {
+                        this.displayBossInfo({ name: '-', coHolder: '-', totalRecharge: '-', remaining: '-' });
+                    }
+                } else {
+                    this.showStatus(`数据导入失败：${this.manager.lastImportError || '请检查数据格式'}`, true);
+                }
+            }
+            updateBossCount() {
+                const count = this.manager.getBossCount();
+                document.getElementById('boss-count').textContent = count;
+                document.getElementById('boss-stats').textContent = `老板总数: ${count}`;
+            }
+            openModal(modalId) {
+                const modal = document.getElementById(modalId);
+                this.lastFocusedElement = document.activeElement && document.activeElement !== document.body
+                    ? document.activeElement
+                    : this.lastFocusedElement;
+                modal.style.display = 'flex';
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.classList.add('modal-open');
+                const content = modal.querySelector('.modal-content');
+                if (content) content.scrollTop = 0;
+                setTimeout(() => {
+                    const focusTarget = modal.querySelector('textarea, input:not([disabled]), select:not([disabled])');
+                    if (focusTarget) focusTarget.focus();
+                }, 0);
+            }
+            closeModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modalId === 'separator-settings-modal') this.resetSeparatorSchemeEdit();
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+                const hasOpenModal = [...document.querySelectorAll('.modal')].some(modal => modal.style.display === 'flex');
+                if (!hasOpenModal) {
+                    document.body.classList.remove('modal-open');
+                    const focusTarget = this.lastFocusedElement;
+                    this.lastFocusedElement = null;
+                    if (focusTarget && focusTarget.isConnected !== false && typeof focusTarget.focus === 'function') {
+                        setTimeout(() => focusTarget.focus(), 0);
+                    }
+                }
+            }
+            showStatus(message, isError = false) {
+                const statusBar = document.getElementById('status-bar');
+                statusBar.style.background = isError ? 'var(--danger-color)' : 'var(--primary-color)';
+                statusBar.children[0].textContent = message + (isError ? '' : ' | 数据已自动保存');
+                if (isError) {
+                    setTimeout(() => {
+                        statusBar.style.background = 'var(--primary-color)';
+                    }, 3000);
+                }
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+            const app = new ClubCardApp();
+            window.app = app;
+        });
+    </script>
+</body>
+</html>
