@@ -372,6 +372,95 @@
       font-size: 12px;
     }
 
+    /* 外部浏览器引导浮层（微信/QQ 内置浏览器） */
+    .ob-mask {
+      position: fixed;
+      inset: 0;
+      z-index: 45;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .ob-mask.show { opacity: 1; pointer-events: auto; }
+    .ob-mask[hidden] { display: none; }
+
+    .ob-arrow {
+      position: fixed;
+      top: calc(16px + env(safe-area-inset-top));
+      right: 20px;
+      width: 52px;
+      height: 52px;
+      color: #ffffff;
+      filter: drop-shadow(0 4px 14px rgba(0, 0, 0, 0.35));
+      animation: ob-float 1.6s ease-in-out infinite;
+      pointer-events: none;
+    }
+    @keyframes ob-float {
+      0%, 100% { transform: translate(0, 0); }
+      50% { transform: translate(6px, -4px); }
+    }
+
+    .ob-panel {
+      width: min(400px, 100%);
+      border-radius: var(--radius-lg);
+      background: #ffffff;
+      box-shadow: var(--shadow-lg);
+      padding: 24px;
+      display: grid;
+      gap: 14px;
+      transform: scale(0.96) translateY(8px);
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .ob-mask.show .ob-panel { transform: scale(1) translateY(0); }
+    .ob-panel h2 { margin: 0; font-size: 18px; font-weight: 700; letter-spacing: -0.01em; text-align: center; }
+    .ob-reason { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; text-align: center; }
+
+    .ob-steps { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+    .ob-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 46px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--fill-2);
+      border: 1px solid var(--line);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .ob-dots { font-weight: 800; letter-spacing: 0.5px; }
+    .ob-menu { color: var(--blue); font-weight: 600; }
+
+    .ob-url-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 8px 8px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--fill);
+      min-width: 0;
+    }
+    .ob-url-row .url { flex: 1; }
+
+    .ob-note {
+      margin: 0;
+      padding: 12px 14px;
+      border-radius: var(--radius-sm);
+      background: var(--blue-bg);
+      color: var(--blue);
+      font-size: 12px;
+      line-height: 1.5;
+      text-align: center;
+    }
+
     /* Responsive adjustments */
     @media (max-width: 580px) {
       .actions { grid-template-columns: 1fr; gap: 8px; }
@@ -380,6 +469,7 @@
       .tip-head { flex-direction: column; align-items: stretch; gap: 14px; }
       .tip-head .btn { width: 100%; }
       .card { padding: 20px; }
+      .ob-panel { padding: 20px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -404,7 +494,7 @@
 
         <div class="actions">
           <a class="btn" href="https://madan.pages.dev">打开微信/浏览器网页版</a>
-          <a class="btn primary" href="https://www.pgyer.com/madanqi-android">下载安卓 APP</a>
+          <a class="btn primary" href="https://www.pgyer.com/madanqi-android" data-open-browser>下载安卓 APP</a>
           <button class="btn outline" type="button" data-copy="码单器\n网页版：https://https://madan.pages.dev/\n安卓APP：https://www.pgyer.com/madanqi-android">复制链接</button>
         </div>
 
@@ -430,7 +520,7 @@
 
         <div class="actions">
           <a class="btn" href="https://xiaxueorca.pages.dev/">打开网页版</a>
-          <a class="btn primary" href="https://www.pgyer.com/xueorca">下载安卓 APP</a>
+          <a class="btn primary" href="https://www.pgyer.com/xueorca" data-open-browser>下载安卓 APP</a>
           <button class="btn outline" type="button" data-copy="订单整理计算器\n网页版：https://xiaxueorca.pages.dev/\n安卓APP：https://www.pgyer.com/xueorca">复制链接</button>
         </div>
 
@@ -456,7 +546,7 @@
 
       <div class="actions">
         <a class="btn" href="https://xiaxueccm.pages.dev/">打开网页版</a>
-        <a class="btn primary" href="https://www.pgyer.com/xueccm">下载安卓 APP</a>
+        <a class="btn primary" href="https://www.pgyer.com/xueccm" data-open-browser>下载安卓 APP</a>
         <button class="btn outline" type="button" data-copy="老板扣卡管理系统
 网页版：https://xiaxueccm.pages.dev/
 安卓APP：https://www.pgyer.com/xueccm">复制链接</button>
@@ -538,6 +628,27 @@
     </div>
   </div>
 
+  <div class="ob-mask" id="obMask" role="dialog" aria-modal="true" aria-labelledby="obTitle" hidden>
+    <svg class="ob-arrow" viewBox="0 0 48 48" fill="none" aria-hidden="true">
+      <path d="M10 38 L38 10" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+      <path d="M38 26 V10 H22" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <div class="ob-panel">
+      <h2 id="obTitle">请在浏览器中打开后继续</h2>
+      <p class="ob-reason" id="obReason">微信内置浏览器暂不支持直接下载安装包</p>
+      <ol class="ob-steps">
+        <li class="ob-step"><span class="num">1</span><span>点击右上角 <span class="ob-dots">···</span> 菜单</span></li>
+        <li class="ob-step"><span class="num">2</span><span>选择「<span class="ob-menu" id="obMenuName">在浏览器打开</span>」</span></li>
+      </ol>
+      <p class="ob-note">打开后将自动继续前往下载页面，无需重新点击</p>
+      <div class="ob-url-row">
+        <span class="url" id="obUrl"></span>
+        <button class="mini-copy" type="button" id="obCopy" aria-label="复制下载链接">⧉</button>
+      </div>
+      <button class="btn primary" type="button" id="obClose">知道了</button>
+    </div>
+  </div>
+
   <div class="toast" id="toast" role="status" aria-live="polite">已复制</div>
 
   <script>
@@ -580,6 +691,81 @@
       document.querySelectorAll('[data-copy]').forEach((btn) => {
         btn.addEventListener('click', () => copyText(btn.getAttribute('data-copy') || ''));
       });
+
+      // ===== 微信/QQ 等内置浏览器：引导跳转外部浏览器打开下载链接 =====
+      const obMask = document.getElementById('obMask');
+      const obUrlEl = document.getElementById('obUrl');
+      const obReason = document.getElementById('obReason');
+      const obMenuName = document.getElementById('obMenuName');
+      const obCopyBtn = document.getElementById('obCopy');
+      const obCloseBtn = document.getElementById('obClose');
+      let obHideTimer = 0;
+
+      // 仅拦截移动端微信 / QQ 聊天内嵌浏览器；桌面版微信/QQ 与常规浏览器保持默认跳转
+      function detectRestrictedWebview(){
+        const ua = navigator.userAgent || '';
+        if(!/Android|iPhone|iPad|iPod|Mobile/i.test(ua)) return '';
+        if(/MicroMessenger/i.test(ua)) return 'wechat';
+        if(/\bQQ\/\d/i.test(ua)) return 'qq';
+        return '';
+      }
+
+      function parseDlHash(){
+        const m = /^#dl=(.+)$/.exec(location.hash || '');
+        if(!m) return '';
+        try { return decodeURIComponent(m[1]); } catch(err){ return m[1]; }
+      }
+
+      function showObMask(url){
+        const env = detectRestrictedWebview();
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+        obUrlEl.textContent = url;
+        obReason.textContent = env === 'qq'
+          ? 'QQ 内置浏览器暂不支持直接下载安装包'
+          : '微信内置浏览器暂不支持直接下载安装包';
+        obMenuName.textContent = isIOS ? '在 Safari 中打开' : '在浏览器打开';
+        window.clearTimeout(obHideTimer);
+        obMask.hidden = false;
+        document.body.classList.add('modal-open');
+        requestAnimationFrame(() => obMask.classList.add('show'));
+      }
+
+      function hideObMask(){
+        obMask.classList.remove('show');
+        document.body.classList.remove('modal-open');
+        obHideTimer = window.setTimeout(() => { obMask.hidden = true; }, 300);
+      }
+
+      obCopyBtn.addEventListener('click', () => copyText(obUrlEl.textContent || ''));
+      obCloseBtn.addEventListener('click', hideObMask);
+      obMask.addEventListener('click', (e) => { if(e.target === obMask) hideObMask(); });
+
+      // 点击“下载安卓 APP”：受限环境拦截跳转，改为引导浮层 + hash 记录目标链接
+      document.querySelectorAll('a[data-open-browser]').forEach((link) => {
+        link.addEventListener('click', (e) => {
+          const url = link.getAttribute('href') || '';
+          if(!url || !detectRestrictedWebview()) return; // 常规环境：保持原生跳转
+          e.preventDefault();
+          // 目标链接写入 hash：用户“在浏览器打开”本页后自动续跳到下载页
+          location.hash = 'dl=' + encodeURIComponent(url);
+          showObMask(url);
+        });
+      });
+
+      // 续跳：常规浏览器直接运行目标网址；仍在内置浏览器则继续展示引导
+      // 覆盖首次加载与同文档 hash 变化（如外部粘贴带 #dl 的链接）
+      function continueDl(){
+        const url = parseDlHash();
+        if(!url) return;
+        if(detectRestrictedWebview()){
+          showObMask(url);
+        } else {
+          try { history.replaceState(null, '', location.pathname + location.search); } catch(err){}
+          location.replace(url);
+        }
+      }
+      continueDl();
+      window.addEventListener('hashchange', continueDl);
 
       const guideModal = document.getElementById('guideModal');
       const openGuide = document.getElementById('openGuide');
